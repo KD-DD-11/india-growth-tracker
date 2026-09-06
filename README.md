@@ -141,3 +141,22 @@ State names in `map-*.json` must match the `st_nm` property and district names t
 Four charts pull from the World Bank Indicators API on each page load (`NY.GDP.MKTP.CD`,
 `NY.GDP.PCAP.CD`, `SP.DYN.LE00.IN`, `IT.NET.USER.ZS`). The dot next to the caption turns green
 when live and red when the page has fallen back to `src/data/worldbank.json`.
+
+### Refreshing the offline fallback
+
+```bash
+npm run refresh
+```
+
+`scripts/refresh.js` re-pulls the full annual history (1960 onwards) of those four indicators for India
+and rewrites `src/data/worldbank.json` with a `fetchedAt` date and, per indicator, the latest year
+available. The page slices this to the same start year as the live chart, so offline and live look the
+same. If any indicator fails to download the script writes nothing.
+
+`.github/workflows/refresh-data.yml` runs this on the 2nd of every month (and on demand from the
+Actions tab) and opens a pull request titled "Refresh World Bank offline fallback" when anything changed.
+For that to work, enable **Settings → Actions → General → Workflow permissions → "Allow GitHub Actions
+to create and approve pull requests"** on the repo.
+
+To add another World Bank indicator, add its code to `INDICATORS` in `scripts/refresh.js` and a
+`liveChart(...)` call in `src/live.js`, plus a `<canvas>` and caption in `index.html`.

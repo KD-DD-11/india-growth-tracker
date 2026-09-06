@@ -1,0 +1,39 @@
+# Monthly refresh of the World Bank offline fallback (src/data/worldbank.json), delivered as a PR.
+# Needs: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
+name: Refresh World Bank data
+
+on:
+  schedule:
+    - cron: '17 3 2 * *'   # 03:17 UTC on the 2nd of every month
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run refresh
+      - run: npm run check:names
+      - name: Open a pull request if anything changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/refresh-worldbank
+          delete-branch: true
+          commit-message: 'Refresh World Bank offline fallback'
+          title: 'Refresh World Bank offline fallback'
+          body: |
+            Automated monthly run of `npm run refresh`.
+
+            It re-pulls NY.GDP.MKTP.CD, NY.GDP.PCAP.CD, SP.DYN.LE00.IN and IT.NET.USER.ZS for India from
+            the World Bank Indicators API into `src/data/worldbank.json`. Check the diff for a new latest
+            year or revised values, then merge.
+          labels: data

@@ -2,7 +2,12 @@
 import { lineChart, INK, PEAC, fmtUSD } from './charts.js';
 import worldbank from './data/worldbank.json';
 
-const FALLBACK = worldbank.indicators;
+// The saved file holds the full history; slice it to the chart's start year so offline and live match.
+const fallback = (indicator, since) => {
+  const f = worldbank.indicators[indicator];
+  const from = f.years.findIndex(y => y >= since);
+  return { years: f.years.slice(from), values: f.values.slice(from) };
+};
 
 async function wb(indicator, since = 1991) {
   const url = `https://api.worldbank.org/v2/country/IND/indicator/${indicator}?format=json&per_page=100&date=${since}:2030`;
@@ -18,7 +23,7 @@ async function liveChart(canvasId, srcId, indicator, opts, since) {
   const src = document.getElementById(srcId);
   let series, live = true;
   try { series = await wb(indicator, since); }
-  catch (e) { series = FALLBACK[indicator]; live = false; }
+  catch (e) { series = fallback(indicator, since); live = false; }
   lineChart(canvasId, series.years, series.values, opts);
   const last = series.years[series.years.length - 1];
   src.textContent = live ? `live, World Bank, latest ${last}` : `offline, using saved data to ${last}`;
