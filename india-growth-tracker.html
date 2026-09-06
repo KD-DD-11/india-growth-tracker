@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>India, counted — a growth tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson-client/3.1.0/topojson-client.min.js"></script>
+<style>
+  /* map */
+  .map-grid{display:grid;grid-template-columns:1fr 300px;gap:28px;margin-top:22px;align-items:start}
+  @media (max-width:800px){.map-grid{grid-template-columns:1fr;gap:18px}}
+  .map-wrap{position:relative;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:8px 0;min-height:320px}
+  .map-wrap svg{width:100%;height:auto;display:block}
+  .st{stroke:var(--paper);stroke-width:.7;cursor:pointer;transition:opacity .25s}
+  .st:hover{stroke:var(--ink);stroke-width:1.2}
+  .dt{stroke:var(--paper);stroke-width:.5;cursor:default}
+  .dt:hover{stroke:var(--ink);stroke-width:1}
+  .st.dim{opacity:.18;pointer-events:none}
+  .st.sel{stroke:var(--ink);stroke-width:1.4;fill-opacity:0}
+  .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);padding:8px 10px;font-size:.82rem;line-height:1.35;border-radius:2px;max-width:220px;opacity:0;transform:translate(-50%,-110%);transition:opacity .12s}
+  .tip b{font-family:"Fraunces",serif;font-weight:500;font-size:1rem;display:block;margin-bottom:2px}
+  .tip .muted{opacity:.7}
+  .map-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .seg{display:inline-flex;border:1px solid var(--rule)}
+  .seg button{appearance:none;background:none;border:0;padding:6px 12px;font:inherit;font-size:.88rem;color:var(--ink-soft);cursor:pointer}
+  .seg button + button{border-left:1px solid var(--rule)}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  .btn-back{appearance:none;border:1px solid var(--ink);background:none;padding:6px 12px;font:inherit;font-size:.88rem;color:var(--ink);cursor:pointer}
+  .btn-back[hidden]{display:none}
+  .legend{margin-top:10px}
+  .legend .bar{height:10px;background:linear-gradient(90deg,var(--l0),var(--l1))}
+  .legend .lab{display:flex;justify-content:space-between;font-size:.78rem;color:var(--ink-soft);margin-top:4px}
+  .side h3{font-family:"Fraunces",serif;font-weight:400;font-size:1.5rem;letter-spacing:-.01em;margin:0 0 4px;line-height:1.15}
+  .side .n{font-family:"Fraunces",serif;font-variation-settings:"opsz" 96;font-size:2.3rem;line-height:1;letter-spacing:-.02em;margin:10px 0 2px}
+  .side .n small{font-size:.5em}
+  .side p{margin:0 0 6px;font-size:.92rem}
+  .side .s{font-size:.8rem;color:var(--ink-soft)}
+  .rank{margin:14px 0 0;padding:0;list-style:none;font-size:.88rem}
+  .rank li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--rule)}
+  .rank li span:last-child{font-family:"Fraunces",serif;font-size:1rem;white-space:nowrap}
+  .rank li.me{font-weight:600}
+  .csv{font-size:.8rem;color:var(--ink-soft);margin-top:14px}
+  .csv input{display:block;margin-top:6px;font-size:.8rem;max-width:100%}
+</style>
+<style>
+  :root{
+    --ink:#17214D;        /* deep indigo: text, primary line */
+    --ink-soft:#5B6284;   /* secondary text */
+    --paper:#FBFAF7;      /* page */
+    --rule:#D9DAD6;       /* ledger rules */
+    --marigold:#E8A317;   /* the one accent */
+    --peacock:#0E7C7B;    /* secondary series */
+    --madder:#B23A48;     /* contractions */
+    --live:#2E8B57;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:16px;line-height:1.5}
+  a{color:inherit}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--marigold);outline-offset:3px}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+  /* header */
+  header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px}
+  .brand{font-family:"Fraunces",serif;font-weight:500;font-size:1.15rem;letter-spacing:-.01em;text-decoration:none}
+  nav{display:flex;gap:22px}
+  nav a{text-decoration:none;color:var(--ink-soft);font-size:.92rem;padding:4px 0;border-bottom:2px solid transparent}
+  nav a:hover,nav a[aria-current]{color:var(--ink);border-bottom-color:var(--marigold)}
+  @media (max-width:560px){nav{gap:14px}nav a{font-size:.85rem}}
+
+  /* hero */
+  .hero{padding:56px 0 32px;display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:end}
+  .hero h1{font-family:"Fraunces",serif;font-weight:300;font-size:clamp(2rem,4.6vw,3.6rem);line-height:1.05;letter-spacing:-.02em;margin:0 0 18px}
+  .hero p{margin:0;color:var(--ink-soft);max-width:52ch}
+  .hero-chart{position:relative;height:260px;border-bottom:1px solid var(--rule)}
+  @media (max-width:800px){.hero{grid-template-columns:1fr;gap:24px;padding-top:36px}.hero-chart{height:220px}}
+
+  /* the latest quarter callout under hero */
+  .pulse{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:baseline;padding:22px 0 26px;border-bottom:3px solid var(--marigold)}
+  .pulse .big{font-family:"Fraunces",serif;font-variation-settings:"opsz" 144;font-weight:400;font-size:clamp(3.2rem,9vw,5.5rem);line-height:.9;letter-spacing:-.03em}
+  .pulse .big small{font-size:.35em;vertical-align:baseline;margin-left:2px}
+  .pulse p{margin:0;max-width:60ch}
+  .pulse p b{font-weight:600}
+
+  /* sections */
+  section{padding:48px 0 12px}
+  section > h2{font-family:"Fraunces",serif;font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:-.015em;margin:0 0 6px}
+  section > .lede{color:var(--ink-soft);margin:0 0 26px;max-width:62ch}
+
+  /* ledger of stats: rows ruled like an account book */
+  .ledger{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule)}
+  .ledger > div{padding:18px 16px 16px 0;border-bottom:1px solid var(--rule)}
+  .ledger > div + div{border-left:1px solid var(--rule);padding-left:16px}
+  .ledger .n{font-family:"Fraunces",serif;font-variation-settings:"opsz" 96;font-weight:400;font-size:2.1rem;line-height:1;letter-spacing:-.02em;margin:0 0 6px}
+  .ledger .n small{font-size:.5em}
+  .ledger .l{margin:0;font-size:.95rem;font-weight:500}
+  .ledger .s{margin:4px 0 0;font-size:.8rem;color:var(--ink-soft)}
+  @media (max-width:800px){
+    .ledger{grid-template-columns:1fr 1fr}
+    .ledger > div:nth-child(2n+1){border-left:0;padding-left:0}
+    .ledger > div:nth-child(2n){border-left:1px solid var(--rule);padding-left:16px}
+  }
+
+  /* chart blocks */
+  .charts{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:28px}
+  @media (max-width:800px){.charts{grid-template-columns:1fr;gap:24px}}
+  figure{margin:0}
+  figure figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
+  figure h3{margin:0;font-size:1rem;font-weight:600}
+  .src{font-size:.78rem;color:var(--ink-soft);white-space:nowrap}
+  .src::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--rule);margin-right:6px;vertical-align:middle}
+  .src.live::before{background:var(--live)}
+  .src.err::before{background:var(--madder)}
+  .ch{position:relative;height:240px}
+  figure .note{font-size:.8rem;color:var(--ink-soft);margin:8px 0 0}
+
+  /* then / now table */
+  table{width:100%;border-collapse:collapse;margin-top:28px;font-size:.95rem}
+  th,td{text-align:left;padding:12px 10px 12px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;font-size:.85rem;color:var(--ink-soft)}
+  td.num{font-family:"Fraunces",serif;font-size:1.25rem;letter-spacing:-.01em;white-space:nowrap}
+  td.delta{color:var(--peacock);font-weight:600;white-space:nowrap}
+  @media (max-width:560px){td.num{font-size:1.05rem}th,td{padding:10px 6px 10px 0}}
+
+  footer{margin-top:56px;padding:28px 0 48px;border-top:1px solid var(--rule);color:var(--ink-soft);font-size:.85rem}
+  footer p{margin:0 0 8px;max-width:80ch}
+  footer ul{margin:10px 0 0;padding-left:18px}
+  footer li{margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top">India, counted</a>
+    <nav aria-label="Sections">
+      <a href="#economy">Economy</a>
+      <a href="#states">By state</a>
+      <a href="#infra">Infrastructure and tech</a>
+      <a href="#society">Society</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <div class="hero">
+    <div>
+      <h1>From a $270 billion economy in 1991 to the world's fourth largest.</h1>
+      <p>A running ledger of how India is growing — output, roads and rails, digital rails, and the lives behind the numbers. Green dots mean the chart is pulling live data; grey dots mean figures embedded as of the date shown.</p>
+    </div>
+    <figure>
+      <figcaption><h3>GDP, current US$</h3><span class="src" id="src-gdp">connecting to World Bank</span></figcaption>
+      <div class="hero-chart"><canvas id="c-gdp"></canvas></div>
+    </figure>
+  </div>
+
+  <div class="pulse">
+    <div class="big" id="pulse-n"></div>
+    <p id="pulse-t"></p>
+  </div>
+
+  <!-- ECONOMY -->
+  <section id="economy">
+    <h2>Economy</h2>
+    <p class="lede">Output, reserves and trade. Quarterly growth is real GDP, year on year, at 2022–23 prices.</p>
+    <div class="ledger" id="ledger-econ"></div>
+    <div class="charts">
+      <figure>
+        <figcaption><h3>Real GDP growth by quarter</h3><span class="src" id="src-q">embedded, as of 31 Aug 2026</span></figcaption>
+        <div class="ch"><canvas id="c-q"></canvas></div>
+        <p class="note">Indian fiscal year runs April to March. Q3 FY26 is left blank until you add it to the data block.</p>
+      </figure>
+      <figure>
+        <figcaption><h3>GDP per person, current US$</h3><span class="src" id="src-pcap">connecting to World Bank</span></figcaption>
+        <div class="ch"><canvas id="c-pcap"></canvas></div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- BY STATE / DISTRICT -->
+  <section id="states">
+    <h2>Where the growth landed</h2>
+    <p class="lede">Income per person by state, 2014-15 against 2023-24. Tap a state to open its districts; the shade carries over until district figures are added.</p>
+    <div class="map-controls">
+      <select id="metric" aria-label="Measure"></select>
+      <div class="seg" role="group" aria-label="Year">
+        <button data-mode="a" aria-pressed="false">2014-15</button>
+        <button data-mode="b" aria-pressed="true">2023-24</button>
+        <button data-mode="x" aria-pressed="false">Change</button>
+      </div>
+      <button class="btn-back" id="map-back" hidden>Back to India</button>
+    </div>
+    <div class="map-grid">
+      <div>
+        <div class="map-wrap" id="map"><div class="tip" id="tip"></div></div>
+        <div class="legend" id="legend"><div class="bar"></div><div class="lab"><span id="l0"></span><span id="l1"></span></div></div>
+      </div>
+      <aside class="side" id="side"></aside>
+    </div>
+    <p class="note" style="font-size:.8rem;color:var(--ink-soft);margin-top:12px">Boundaries: Census 2011 districts (udit-001/india-maps-data). Ladakh, Lakshadweep and DNH &amp; DD have no comparable 2014-15 series and are left unshaded in that view.</p>
+  </section>
+
+  <!-- INFRA & TECH -->
+  <section id="infra">
+    <h2>Infrastructure and tech</h2>
+    <p class="lede">The physical and digital rails the economy runs on.</p>
+    <div class="ledger" id="ledger-infra"></div>
+    <div class="charts">
+      <figure>
+        <figcaption><h3>UPI transactions in August, each year</h3><span class="src">embedded, NPCI, as of Aug 2026</span></figcaption>
+        <div class="ch"><canvas id="c-upi"></canvas></div>
+        <p class="note">Billions of transactions per month. August is used so every point is the same season.</p>
+      </figure>
+      <figure>
+        <figcaption><h3>National highway network</h3><span class="src">embedded, MoRTH, as of Feb 2026</span></figcaption>
+        <div class="ch"><canvas id="c-nh"></canvas></div>
+        <p class="note">Kilometres. Expressways and access-controlled corridors shown separately.</p>
+      </figure>
+    </div>
+    <table id="thennow">
+      <thead><tr><th>Then and now</th><th>2014</th><th>Latest</th><th>Change</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- SOCIETY -->
+  <section id="society">
+    <h2>Society</h2>
+    <p class="lede">Health, learning, and who gets to take part.</p>
+    <div class="ledger" id="ledger-soc"></div>
+    <div class="charts">
+      <figure>
+        <figcaption><h3>Life expectancy at birth</h3><span class="src" id="src-le">connecting to World Bank</span></figcaption>
+        <div class="ch"><canvas id="c-le"></canvas></div>
+      </figure>
+      <figure>
+        <figcaption><h3>People using the internet</h3><span class="src" id="src-net">connecting to World Bank</span></figcaption>
+        <div class="ch"><canvas id="c-net"></canvas></div>
+        <p class="note">Share of population, per ITU estimates.</p>
+      </figure>
+    </div>
+  </section>
+
+  <footer>
+    <p>Live series come from the World Bank Indicators API and refresh each time the page loads. Everything else is typed into the <code>DATA</code> object at the top of the script, with a source and an as-of date next to each figure — edit that block to update the site.</p>
+    <ul>
+      <li>MoSPI / NSO — quarterly GDP estimates (31 Aug 2026)</li>
+      <li>NPCI — monthly UPI statistics (1 Sep 2026)</li>
+      <li>MoRTH, Ministry of Railways, MoPSW — network and capacity figures via PIB (Feb–Jun 2026)</li>
+      <li>World Bank, PLFS, SRS, Jal Jeevan Mission dashboard — social indicators, dates as shown</li>
+    </ul>
+    <p style="margin-top:14px">Last edited 6 September 2026.</p>
+  </footer>
+</main>
+
+<script>
+/* =========================================================
+   DATA — edit this block to update the site.
+   Every figure carries `src` and `asOf` so readers can judge it.
+   ========================================================= */
+const DATA = {
+  pulse: {
+    value: 7.8, unit: "%",
+    text: "<b>Real GDP grew 7.8% in Q1 FY27</b> (April–June 2026), ahead of the RBI's 7% projection and the fastest quarter in two years. Nominal growth was 10.3%, investment rose 11.9% and consumption 7.1%.",
+    src: "MoSPI", asOf: "31 Aug 2026"
+  },
+
+  economy: [
+    { n: "7.8", unit: "%",   l: "Real GDP growth, Q1 FY27",            s: "MoSPI · 31 Aug 2026" },
+    { n: "₹81.4", unit: "L cr", l: "Real GDP, Q1 FY27 at 2022–23 prices", s: "MoSPI · 31 Aug 2026" },
+    { n: "10.3", unit: "%",  l: "Nominal GDP growth, Q1 FY27",         s: "MoSPI · 31 Aug 2026" },
+    { n: "4th",  unit: "",   l: "Largest economy by nominal GDP",       s: "IMF WEO · 2025" }
+  ],
+
+  // Real GDP growth by quarter, year on year, %. null = not yet entered.
+  quarters: {
+    labels: ["Q1 FY25","Q2 FY25","Q3 FY25","Q4 FY25","Q1 FY26","Q2 FY26","Q3 FY26","Q4 FY26","Q1 FY27"],
+    values: [6.5, 5.6, 6.4, 7.4, 6.9, 8.2, null, 8.6, 7.8],
+    note: "Q1 FY26 and Q4 FY26 are revised figures per the Aug 2026 release."
+  },
+
+  infra: [
+    { n: "24.5", unit: "bn", l: "UPI transactions, August 2026",       s: "NPCI · 1 Sep 2026" },
+    { n: "₹29.8", unit: "L cr", l: "Value moved on UPI, August 2026",   s: "NPCI · 1 Sep 2026" },
+    { n: "1,46,572", unit: "km", l: "National highway network",        s: "MoRTH · Feb 2026" },
+    { n: "164",  unit: "",   l: "Vande Bharat services running",        s: "Indian Railways · early 2026" }
+  ],
+
+  // UPI monthly volume in August of each year, billions
+  upi: {
+    labels: ["2019","2020","2021","2022","2023","2024","2025","2026"],
+    values: [0.92, 1.62, 3.55, 6.58, 10.58, 14.96, 19.63, 24.51]
+  },
+
+  highways: {
+    labels: ["March 2014","February 2026"],
+    network: [91287, 146572],
+    expressways: [93, 3052]
+  },
+
+  thenNow: [
+    { k: "National highways",                a: "91,287 km",  b: "1,46,572 km", d: "+61%",  asOf: "Feb 2026" },
+    { k: "Expressways / access-controlled",  a: "93 km",      b: "3,052 km",    d: "33×",   asOf: "Feb 2026" },
+    { k: "Major port capacity",              a: "873 MMTPA",  b: "1,726 MMTPA", d: "~2×",   asOf: "2026" },
+    { k: "UPI transactions per month",       a: "—",          b: "24.5 bn",     d: "launched 2016", asOf: "Aug 2026" },
+    { k: "Operational airports",             a: "74",         b: "160+",        d: "~2×",   asOf: "2025" },
+    { k: "Metro rail in operation",          a: "~250 km",    b: "1,000+ km",   d: "~4×",   asOf: "2025" }
+  ],
+
+  society: [
+    { n: "2.3", unit: "%",  l: "Living in extreme poverty (US$2.15/day)", s: "World Bank · 2022–23, from 16.2% in 2011–12" },
+    { n: "80.9", unit: "%", l: "Literacy, age 7 and above",              s: "PLFS · 2023–24" },
+    { n: "41.7", unit: "%", l: "Women in the labour force (15+)",         s: "PLFS · 2023–24, from 23.3% in 2017–18" },
+    { n: "80", unit: "%+",  l: "Rural households with tap water",         s: "Jal Jeevan Mission · 2025, from 17% in 2019" }
+  ]
+};
+
+/* ---------- helpers ---------- */
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const INK = css('--ink'), SOFT = css('--ink-soft'), RULE = css('--rule'),
+      MARI = css('--marigold'), PEAC = css('--peacock'), MADD = css('--madder');
+
+Chart.defaults.font.family = '"DM Sans", system-ui, sans-serif';
+Chart.defaults.color = SOFT;
+Chart.defaults.borderColor = RULE;
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.plugins.tooltip.backgroundColor = INK;
+Chart.defaults.plugins.tooltip.titleFont = { family: '"DM Sans"', weight: '600' };
+Chart.defaults.animation = matchMedia('(prefers-reduced-motion: reduce)').matches ? false : { duration: 600 };
+
+const fmtUSD = v => v >= 1e12 ? '$' + (v/1e12).toFixed(2) + ' tn' : '$' + Math.round(v/1e9) + ' bn';
+const scaleX = { grid: { display: false }, ticks: { maxTicksLimit: 7, maxRotation: 0 } };
+const scaleY = (fmt) => ({ grid: { color: RULE, drawBorder: false }, ticks: { callback: fmt, maxTicksLimit: 5 }, border: { display: false } });
+
+function lineChart(id, labels, values, { color = INK, fmt = v => v, fill = false } = {}) {
+  return new Chart(document.getElementById(id), {
+    type: 'line',
+    data: { labels, datasets: [{ data: values, borderColor: color, borderWidth: 2, pointRadius: 0, pointHitRadius: 12, tension: .25, fill, backgroundColor: color + '14', spanGaps: false }] },
+    options: { maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      scales: { x: scaleX, y: scaleY(fmt) },
+      plugins: { tooltip: { callbacks: { label: c => fmt(c.parsed.y) } } } }
+  });
+}
+
+/* ---------- ledgers ---------- */
+function ledger(id, rows) {
+  document.getElementById(id).innerHTML = rows.map(r =>
+    `<div><p class="n">${r.n}<small> ${r.unit}</small></p><p class="l">${r.l}</p><p class="s">${r.s}</p></div>`).join('');
+}
+ledger('ledger-econ', DATA.economy);
+ledger('ledger-infra', DATA.infra);
+ledger('ledger-soc', DATA.society);
+
+/* ---------- pulse ---------- */
+document.getElementById('pulse-n').innerHTML = DATA.pulse.value + '<small>' + DATA.pulse.unit + '</small>';
+document.getElementById('pulse-t').innerHTML = DATA.pulse.text + ` <span style="color:var(--ink-soft)">${DATA.pulse.src}, ${DATA.pulse.asOf}.</span>`;
+
+/* ---------- then / now ---------- */
+document.querySelector('#thennow tbody').innerHTML = DATA.thenNow.map(r =>
+  `<tr><td>${r.k}<br><span class="src" style="white-space:normal">${r.asOf}</span></td><td class="num">${r.a}</td><td class="num">${r.b}</td><td class="delta">${r.d}</td></tr>`).join('');
+
+/* ---------- embedded charts ---------- */
+new Chart(document.getElementById('c-q'), {
+  type: 'bar',
+  data: { labels: DATA.quarters.labels, datasets: [{ data: DATA.quarters.values,
+    backgroundColor: DATA.quarters.values.map((v, i) => v == null ? RULE : (i === DATA.quarters.values.length - 1 ? MARI : INK)), borderRadius: 2, maxBarThickness: 34 }] },
+  options: { maintainAspectRatio: false, scales: { x: scaleX, y: { ...scaleY(v => v + '%'), beginAtZero: true } },
+    plugins: { tooltip: { callbacks: { label: c => c.parsed.y == null ? 'not yet entered' : c.parsed.y + '% y/y' } } } }
+});
+
+lineChart('c-upi', DATA.upi.labels, DATA.upi.values, { color: PEAC, fmt: v => v + ' bn', fill: true });
+
+new Chart(document.getElementById('c-nh'), {
+  type: 'bar',
+  data: { labels: DATA.highways.labels, datasets: [
+    { label: 'National highways', data: DATA.highways.network, backgroundColor: INK, maxBarThickness: 64, borderRadius: 2 },
+    { label: 'Expressways', data: DATA.highways.expressways, backgroundColor: MARI, maxBarThickness: 64, borderRadius: 2 } ] },
+  options: { maintainAspectRatio: false, scales: { x: scaleX, y: { ...scaleY(v => (v/1000) + 'k'), beginAtZero: true } },
+    plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } },
+      tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.parsed.y.toLocaleString('en-IN') + ' km' } } } }
+});
+
+/* ---------- live World Bank series ---------- */
+// Fallbacks so the page is never empty if the API is unreachable.
+const FALLBACK = {
+  'NY.GDP.MKTP.CD': { years: [1991,1995,2000,2005,2010,2015,2020,2022,2023,2024], values: [2.70e11,3.60e11,4.68e11,8.20e11,1.68e12,2.10e12,2.67e12,3.42e12,3.57e12,3.91e12] },
+  'NY.GDP.PCAP.CD': { years: [1991,2000,2010,2015,2020,2024], values: [303,443,1350,1590,1913,2700] },
+  'SP.DYN.LE00.IN': { years: [1991,2000,2010,2019,2021,2023], values: [58.5,62.5,66.7,70.9,67.2,72.0] },
+  'IT.NET.USER.ZS': { years: [2000,2010,2015,2020,2023], values: [0.5,7.5,14.9,43.4,55.0] }
+};
+
+async function wb(indicator, since = 1991) {
+  const url = `https://api.worldbank.org/v2/country/IND/indicator/${indicator}?format=json&per_page=100&date=${since}:2030`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(res.status);
+  const [, rows] = await res.json();
+  const pts = rows.filter(r => r.value != null).map(r => ({ y: +r.date, v: r.value })).sort((a, b) => a.y - b.y);
+  if (!pts.length) throw new Error('empty');
+  return { years: pts.map(p => p.y), values: pts.map(p => p.v) };
+}
+
+async function liveChart(canvasId, srcId, indicator, opts, since) {
+  const src = document.getElementById(srcId);
+  let series, live = true;
+  try { series = await wb(indicator, since); }
+  catch (e) { series = FALLBACK[indicator]; live = false; }
+  lineChart(canvasId, series.years, series.values, opts);
+  const last = series.years[series.years.length - 1];
+  src.textContent = live ? `live, World Bank, latest ${last}` : `offline, using saved data to ${last}`;
+  src.className = 'src ' + (live ? 'live' : 'err');
+}
+
+liveChart('c-gdp',  'src-gdp',  'NY.GDP.MKTP.CD', { color: INK,  fmt: fmtUSD, fill: true }, 1991);
+liveChart('c-pcap', 'src-pcap', 'NY.GDP.PCAP.CD', { color: INK,  fmt: v => '$' + Math.round(v).toLocaleString() }, 1991);
+liveChart('c-le',   'src-le',   'SP.DYN.LE00.IN', { color: PEAC, fmt: v => v.toFixed(1) + ' yrs' }, 1991);
+liveChart('c-net',  'src-net',  'IT.NET.USER.ZS', { color: PEAC, fmt: v => v.toFixed(0) + '%', fill: true }, 2000);
+
+/* =========================================================
+   MAP DATA — state and district figures.
+   Each metric has values keyed by the state name used in the
+   boundary file: [2014-15 value, 2023-24 value]. null = no data.
+   Districts go in MAP.districts as { State: { District: [a, b] } },
+   or upload a CSV (state,district,value_a,value_b) from the panel.
+   ========================================================= */
+const MAP = {
+  topo: [
+    'https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@main/topojson/india.json',
+    'https://raw.githubusercontent.com/udit-001/india-maps-data/main/topojson/india.json'
+  ],
+  metrics: [{
+    id: 'pci',
+    name: 'Income per person (NSDP per capita, current prices)',
+    unit: '₹', a: '2014-15', b: '2023-24',
+    india: [86647, 188892],
+    src: '2023-24: MoSPI state series. 2014-15: RBI Handbook of Statistics on Indian States, Table 19 — typed from memory except Delhi, Haryana, Puducherry; verify before publishing.',
+    values: {
+      'Andhra Pradesh': [93903, 237951], 'Arunachal Pradesh': [105000, 217325], 'Assam': [52895, 143852],
+      'Bihar': [28671, 62201], 'Chhattisgarh': [72236, 148922], 'Delhi': [247209, 459408], 'Goa': [259444, 585953],
+      'Gujarat': [127017, 297722], 'Haryana': [147076, 319363], 'Himachal Pradesh': [123299, 234721],
+      'Jammu and Kashmir': [65868, 140051], 'Jharkhand': [57301, 106529], 'Karnataka': [130024, 339813],
+      'Kerala': [135537, 281269], 'Madhya Pradesh': [54167, 139713], 'Maharashtra': [136000, 278681],
+      'Manipur': [51000, 119938], 'Meghalaya': [64638, 141195], 'Mizoram': [103049, 234996], 'Nagaland': [78526, 154828],
+      'Odisha': [62000, 150414], 'Puducherry': [175006, 252164], 'Punjab': [110000, 205374], 'Rajasthan': [76881, 166647],
+      'Sikkim': [225000, 587743], 'Tamil Nadu': [129494, 313329], 'Telangana': [124104, 347714], 'Tripura': [69474, 172299],
+      'Uttar Pradesh': [42267, 97364], 'Uttarakhand': [130000, 246178], 'West Bengal': [76000, 149515],
+      'Chandigarh': [220000, 453457], 'Andaman and Nicobar Islands': [120000, 276000],
+      'Ladakh': [null, 242360], 'Lakshadweep': [null, null], 'Dadra and Nagar Haveli and Daman and Diu': [null, null]
+    }
+  }],
+  districts: {}
+};
+
+(async function initMap() {
+  const wrap = document.getElementById('map');
+  let topo = null;
+  for (const u of MAP.topo) { try { const r = await fetch(u); if (r.ok) { topo = await r.json(); break; } } catch (e) {} }
+  if (!topo) { wrap.insertAdjacentHTML('beforeend', '<p class="note">Map boundaries could not load. Check the connection and reload.</p>'); return; }
+
+  const states = topojson.feature(topo, topo.objects.states);
+  const districts = topojson.feature(topo, topo.objects.districts);
+  const W = 800, H = 780;
+  const svg = d3.select(wrap).insert('svg', '.tip').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Choropleth map of India by state');
+  const g = svg.append('g');
+  const proj = d3.geoMercator().fitSize([W, H], states);
+  const path = d3.geoPath(proj);
+  const gS = g.append('g'), gD = g.append('g').style('display', 'none');
+  const tip = document.getElementById('tip');
+  const side = document.getElementById('side');
+  const sel = document.getElementById('metric');
+  const legend = document.getElementById('legend');
+
+  MAP.metrics.forEach(m => sel.add(new Option(m.name, m.id)));
+  let metric = MAP.metrics[0], mode = 'b', open = null;
+
+  const fmt = v => v == null ? '—' : metric.unit === '₹'
+    ? (v >= 1e5 ? '₹' + (v / 1e5).toFixed(2) + ' L' : '₹' + Math.round(v).toLocaleString('en-IN'))
+    : v.toLocaleString('en-IN');
+  const fmtX = x => x == null ? '—' : x.toFixed(1) + '×';
+  const valOf = (pair) => !pair ? null : mode === 'a' ? pair[0] : mode === 'b' ? pair[1] : (pair[0] && pair[1] ? pair[1] / pair[0] : null);
+  const stateVal = n => valOf(metric.values[n]);
+  const distVal = (s, d) => valOf((MAP.districts[s] || {})[d]);
+
+  let scale;
+  function buildScale() {
+    const all = Object.values(metric.values);
+    const [c0, c1] = mode === 'x' ? [PEAC + '26', PEAC] : ['#E6E9F2', INK];
+    let lo, hi;
+    if (mode === 'x') { const xs = all.map(valOf).filter(v => v != null); lo = d3.min(xs); hi = d3.max(xs); }
+    else { const vs = all.flat().filter(v => v != null); lo = d3.min(vs); hi = d3.max(vs); } // same domain for both years so the shift is visible
+    scale = d3.scaleSequential(d3.interpolateRgb(c0, c1)).domain([lo, hi]);
+    legend.style.setProperty('--l0', c0); legend.style.setProperty('--l1', c1);
+    document.getElementById('l0').textContent = mode === 'x' ? fmtX(lo) : fmt(lo);
+    document.getElementById('l1').textContent = mode === 'x' ? fmtX(hi) : fmt(hi);
+  }
+  const fillFor = v => v == null ? RULE : scale(v);
+
+  const sp = gS.selectAll('path').data(states.features).join('path').attr('d', path).attr('class', 'st')
+    .on('pointermove', (e, d) => showTip(e, d.properties.st_nm, metric.values[d.properties.st_nm]))
+    .on('pointerleave', hideTip)
+    .on('click', (e, d) => zoomTo(d));
+  const dp = gD.selectAll('path').data(districts.features).join('path').attr('d', path).attr('class', 'dt')
+    .on('pointermove', (e, d) => { const s = d.properties.st_nm, n = d.properties.district; const pair = (MAP.districts[s] || {})[n]; showTip(e, n, pair || metric.values[s], pair ? '' : 'state figure — no district data yet'); })
+    .on('pointerleave', hideTip);
+
+  function paint() {
+    buildScale();
+    sp.transition().duration(500).attr('fill', d => fillFor(stateVal(d.properties.st_nm)));
+    dp.transition().duration(500)
+      .attr('fill', d => { const v = distVal(d.properties.st_nm, d.properties.district); return v != null ? fillFor(v) : fillFor(stateVal(d.properties.st_nm)); })
+      .attr('fill-opacity', d => distVal(d.properties.st_nm, d.properties.district) != null ? 1 : .45);
+    renderSide();
+  }
+
+  function showTip(e, name, pair, note) {
+    const r = wrap.getBoundingClientRect();
+    tip.innerHTML = `<b>${name}</b>${metric.a} ${fmt(pair && pair[0])}<br>${metric.b} ${fmt(pair && pair[1])}<br><span class="muted">${pair && pair[0] && pair[1] ? fmtX(pair[1] / pair[0]) + ' in nominal terms' : 'no comparable baseline'}${note ? ' · ' + note : ''}</span>`;
+    tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = (e.clientY - r.top) + 'px'; tip.style.opacity = 1;
+  }
+  function hideTip() { tip.style.opacity = 0; }
+
+  function zoomTo(d) {
+    open = d.properties.st_nm;
+    const [[x0, y0], [x1, y1]] = path.bounds(d);
+    const k = Math.min(8, .9 / Math.max((x1 - x0) / W, (y1 - y0) / H));
+    const tx = W / 2 - k * (x0 + x1) / 2, ty = H / 2 - k * (y0 + y1) / 2;
+    sp.classed('dim', s => s.properties.st_nm !== open).classed('sel', s => s.properties.st_nm === open);
+    gD.style('display', null);
+    dp.style('display', s => s.properties.st_nm === open ? null : 'none');
+    g.transition().duration(650).attr('transform', `translate(${tx},${ty}) scale(${k})`);
+    document.getElementById('map-back').hidden = false;
+    renderSide();
+  }
+  function reset() {
+    open = null;
+    sp.classed('dim', false).classed('sel', false);
+    g.transition().duration(650).attr('transform', null).on('end', () => gD.style('display', 'none'));
+    document.getElementById('map-back').hidden = true;
+    renderSide();
+  }
+  document.getElementById('map-back').addEventListener('click', reset);
+
+  function renderSide() {
+    const rows = Object.entries(metric.values).filter(([, p]) => p && p[0] && p[1]).map(([n, p]) => ({ n, a: p[0], b: p[1], x: p[1] / p[0] }));
+    const key = mode === 'x' ? 'x' : mode === 'a' ? 'a' : 'b';
+    rows.sort((p, q) => q[key] - p[key]);
+    const f = mode === 'x' ? v => fmtX(v) : fmt;
+    if (open) {
+      const p = metric.values[open], r = rows.find(r => r.n === open);
+      const dCount = Object.keys(MAP.districts[open] || {}).length;
+      side.innerHTML = `<h3>${open}</h3>
+        <p class="n">${p && p[0] && p[1] ? fmtX(p[1] / p[0]) : '—'}</p>
+        <p>${metric.a} ${fmt(p && p[0])} → ${metric.b} ${fmt(p && p[1])}</p>
+        <p class="s">${r ? 'Ranked ' + (rows.findIndex(x => x.n === open) + 1) + ' of ' + rows.length + ' by ' + (mode === 'x' ? 'change' : mode === 'a' ? metric.a : metric.b) : 'No comparable baseline.'} India went ${fmt(metric.india[0])} → ${fmt(metric.india[1])}, ${fmtX(metric.india[1] / metric.india[0])}.</p>
+        <p class="s">${dCount ? dCount + ' districts have their own figures.' : 'Districts show the state figure until you add district data.'}</p>
+        <div class="csv">Add district figures as CSV: <code>state,district,${metric.a},${metric.b}</code><input type="file" accept=".csv" id="csv"></div>`;
+      document.getElementById('csv').addEventListener('change', loadCSV);
+    } else {
+      const top = rows.slice(0, 5), bottom = rows.slice(-5);
+      const li = r => `<li><span>${r.n}</span><span>${f(r[key])}</span></li>`;
+      side.innerHTML = `<h3>${mode === 'x' ? 'Fastest and slowest' : 'Highest and lowest'}, ${mode === 'x' ? metric.a + ' to ' + metric.b : mode === 'a' ? metric.a : metric.b}</h3>
+        <p class="s">India: ${mode === 'x' ? fmtX(metric.india[1] / metric.india[0]) : fmt(metric.india[mode === 'a' ? 0 : 1])}</p>
+        <ul class="rank">${top.map(li).join('')}<li style="border-top-style:dashed;color:var(--ink-soft)"><span>…</span><span></span></li>${bottom.map(li).join('')}</ul>
+        <p class="s" style="margin-top:12px">${metric.src}</p>`;
+    }
+  }
+
+  function loadCSV(e) {
+    const file = e.target.files[0]; if (!file) return;
+    file.text().then(t => {
+      t.trim().split(/\r?\n/).slice(1).forEach(line => {
+        const [s, d, a, b] = line.split(',').map(x => x.trim().replace(/^"|"$/g, ''));
+        if (!s || !d) return;
+        (MAP.districts[s] = MAP.districts[s] || {})[d] = [+a || null, +b || null];
+      });
+      paint();
+    });
+  }
+
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    mode = b.dataset.mode;
+    document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    paint();
+  }));
+  sel.addEventListener('change', () => { metric = MAP.metrics.find(m => m.id === sel.value); paint(); });
+
+  paint();
+})();
+
+/* ---------- nav highlight ---------- */
+const links = [...document.querySelectorAll('nav a')];
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) links.forEach(a => a.toggleAttribute('aria-current', a.getAttribute('href') === '#' + e.target.id));
+}), { rootMargin: '-40% 0px -55% 0px' });
+document.querySelectorAll('main section').forEach(s => io.observe(s));
+</script>
+</body>
+</html>

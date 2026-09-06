@@ -1,0 +1,25 @@
+{
+  "ledger": [
+    { "n": "24.5",     "unit": "bn",   "l": "UPI transactions, August 2026",   "s": "NPCI · 1 Sep 2026" },
+    { "n": "₹29.8",    "unit": "L cr", "l": "Value moved on UPI, August 2026", "s": "NPCI · 1 Sep 2026" },
+    { "n": "1,46,572", "unit": "km",   "l": "National highway network",        "s": "MoRTH · Feb 2026" },
+    { "n": "164",      "unit": "",     "l": "Vande Bharat services running",    "s": "Indian Railways · early 2026" }
+  ],
+  "upi": {
+    "labels": ["2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],
+    "values": [0.92, 1.62, 3.55, 6.58, 10.58, 14.96, 19.63, 24.51]
+  },
+  "highways": {
+    "labels": ["March 2014", "February 2026"],
+    "network": [91287, 146572],
+    "expressways": [93, 3052]
+  },
+  "thenNow": [
+    { "k": "National highways",               "a": "91,287 km", "b": "1,46,572 km", "d": "+61%",          "asOf": "Feb 2026" },
+    { "k": "Expressways / access-controlled", "a": "93 km",     "b": "3,052 km",    "d": "33×",           "asOf": "Feb 2026" },
+    { "k": "Major port capacity",             "a": "873 MMTPA", "b": "1,726 MMTPA", "d": "~2×",           "asOf": "2026" },
+    { "k": "UPI transactions per month",      "a": "—",         "b": "24.5 bn",     "d": "launched 2016", "asOf": "Aug 2026" },
+    { "k": "Operational airports",            "a": "74",        "b": "160+",        "d": "~2×",           "asOf": "2025" },
+    { "k": "Metro rail in operation",         "a": "~250 km",   "b": "1,000+ km",   "d": "~4×",           "asOf": "2025" }
+  ]
+}

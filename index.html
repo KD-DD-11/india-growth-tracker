@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>India, counted — a growth tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top">India, counted</a>
+    <nav aria-label="Sections">
+      <a href="#economy">Economy</a>
+      <a href="#states">By state</a>
+      <a href="#infra">Infrastructure and tech</a>
+      <a href="#society">Society</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <div class="hero">
+    <div>
+      <h1>From a $270 billion economy in 1991 to the world's fourth largest.</h1>
+      <p>A running ledger of how India is growing — output, roads and rails, digital rails, and the lives behind the numbers. Green dots mean the chart is pulling live data; grey dots mean figures embedded as of the date shown.</p>
+    </div>
+    <figure>
+      <figcaption><h3>GDP, current US$</h3><span class="src" id="src-gdp">connecting to World Bank</span></figcaption>
+      <div class="hero-chart"><canvas id="c-gdp"></canvas></div>
+    </figure>
+  </div>
+
+  <div class="pulse">
+    <div class="big" id="pulse-n"></div>
+    <p id="pulse-t"></p>
+  </div>
+
+  <!-- ECONOMY -->
+  <section id="economy">
+    <h2>Economy</h2>
+    <p class="lede">Output, reserves and trade. Quarterly growth is real GDP, year on year, at 2022–23 prices.</p>
+    <div class="ledger" id="ledger-econ"></div>
+    <div class="charts">
+      <figure>
+        <figcaption><h3>Real GDP growth by quarter</h3><span class="src" id="src-q">embedded, as of 31 Aug 2026</span></figcaption>
+        <div class="ch"><canvas id="c-q"></canvas></div>
+        <p class="note">Indian fiscal year runs April to March. Q3 FY26 is left blank until you add it to the data block.</p>
+      </figure>
+      <figure>
+        <figcaption><h3>GDP per person, current US$</h3><span class="src" id="src-pcap">connecting to World Bank</span></figcaption>
+        <div class="ch"><canvas id="c-pcap"></canvas></div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- BY STATE / DISTRICT -->
+  <section id="states">
+    <h2>Where the growth landed</h2>
+    <p class="lede">Income per person by state, 2014-15 against 2023-24. Tap a state to open its districts; the shade carries over until district figures are added.</p>
+    <div class="map-controls">
+      <select id="metric" aria-label="Measure"></select>
+      <div class="seg" role="group" aria-label="Year">
+        <button data-mode="a" aria-pressed="false">2014-15</button>
+        <button data-mode="b" aria-pressed="true">2023-24</button>
+        <button data-mode="x" aria-pressed="false">Change</button>
+      </div>
+      <button class="btn-back" id="map-back" hidden>Back to India</button>
+    </div>
+    <div class="map-grid">
+      <div>
+        <div class="map-wrap" id="map"><div class="tip" id="tip"></div></div>
+        <div class="legend" id="legend"><div class="bar"></div><div class="lab"><span id="l0"></span><span id="l1"></span></div></div>
+      </div>
+      <aside class="side" id="side"></aside>
+    </div>
+    <p class="note" style="font-size:.8rem;color:var(--ink-soft);margin-top:12px">Boundaries: Census 2011 districts (udit-001/india-maps-data). Ladakh, Lakshadweep and DNH &amp; DD have no comparable 2014-15 series and are left unshaded in that view.</p>
+  </section>
+
+  <!-- INFRA & TECH -->
+  <section id="infra">
+    <h2>Infrastructure and tech</h2>
+    <p class="lede">The physical and digital rails the economy runs on.</p>
+    <div class="ledger" id="ledger-infra"></div>
+    <div class="charts">
+      <figure>
+        <figcaption><h3>UPI transactions in August, each year</h3><span class="src">embedded, NPCI, as of Aug 2026</span></figcaption>
+        <div class="ch"><canvas id="c-upi"></canvas></div>
+        <p class="note">Billions of transactions per month. August is used so every point is the same season.</p>
+      </figure>
+      <figure>
+        <figcaption><h3>National highway network</h3><span class="src">embedded, MoRTH, as of Feb 2026</span></figcaption>
+        <div class="ch"><canvas id="c-nh"></canvas></div>
+        <p class="note">Kilometres. Expressways and access-controlled corridors shown separately.</p>
+      </figure>
+    </div>
+    <table id="thennow">
+      <thead><tr><th>Then and now</th><th>2014</th><th>Latest</th><th>Change</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- SOCIETY -->
+  <section id="society">
+    <h2>Society</h2>
+    <p class="lede">Health, learning, and who gets to take part.</p>
+    <div class="ledger" id="ledger-soc"></div>
+    <div class="charts">
+      <figure>
+        <figcaption><h3>Life expectancy at birth</h3><span class="src" id="src-le">connecting to World Bank</span></figcaption>
+        <div class="ch"><canvas id="c-le"></canvas></div>
+      </figure>
+      <figure>
+        <figcaption><h3>People using the internet</h3><span class="src" id="src-net">connecting to World Bank</span></figcaption>
+        <div class="ch"><canvas id="c-net"></canvas></div>
+        <p class="note">Share of population, per ITU estimates.</p>
+      </figure>
+    </div>
+  </section>
+
+  <footer>
+    <p>Live series come from the World Bank Indicators API and refresh each time the page loads. Everything else is typed into the <code>DATA</code> object at the top of the script, with a source and an as-of date next to each figure — edit that block to update the site.</p>
+    <ul>
+      <li>MoSPI / NSO — quarterly GDP estimates (31 Aug 2026)</li>
+      <li>NPCI — monthly UPI statistics (1 Sep 2026)</li>
+      <li>MoRTH, Ministry of Railways, MoPSW — network and capacity figures via PIB (Feb–Jun 2026)</li>
+      <li>World Bank, PLFS, SRS, Jal Jeevan Mission dashboard — social indicators, dates as shown</li>
+    </ul>
+    <p style="margin-top:14px">Last edited 6 September 2026.</p>
+  </footer>
+</main>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
