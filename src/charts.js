@@ -29,15 +29,18 @@ export function lineChart(id, labels, values, { color = INK, fmt = v => v, fill 
 }
 
 /* ---------- ledgers ---------- */
+// Source line under each tile: "MoSPI · 31 Aug 2026" or "World Bank · 2022–23, from 16.2% in 2011–12".
+export const sourceLine = r => `${r.source} · ${r.asOf}${r.note ? ', ' + r.note : ''}`;
+
 export function ledger(id, rows) {
   document.getElementById(id).innerHTML = rows.map(r =>
-    `<div><p class="n">${r.n}<small> ${r.unit}</small></p><p class="l">${r.l}</p><p class="s">${r.s}</p></div>`).join('');
+    `<div><p class="n">${r.n}<small> ${r.unit}</small></p><p class="l">${r.l}</p><p class="s">${sourceLine(r)}</p></div>`).join('');
 }
 
 /* ---------- pulse ---------- */
 export function pulse(p) {
   document.getElementById('pulse-n').innerHTML = p.value + '<small>' + p.unit + '</small>';
-  document.getElementById('pulse-t').innerHTML = p.text + ` <span style="color:var(--ink-soft)">${p.src}, ${p.asOf}.</span>`;
+  document.getElementById('pulse-t').innerHTML = p.text + ` <span style="color:var(--ink-soft)">${p.source}, ${p.asOf}.</span>`;
 }
 
 /* ---------- then / now ---------- */

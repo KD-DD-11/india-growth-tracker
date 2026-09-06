@@ -2,6 +2,6 @@
   "value": 7.8,
   "unit": "%",
   "text": "<b>Real GDP grew 7.8% in Q1 FY27</b> (April–June 2026), ahead of the RBI's 7% projection and the fastest quarter in two years. Nominal growth was 10.3%, investment rose 11.9% and consumption 7.1%.",
-  "src": "MoSPI",
+  "source": "MoSPI",
   "asOf": "31 Aug 2026"
 }

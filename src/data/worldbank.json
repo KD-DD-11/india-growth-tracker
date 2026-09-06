@@ -1,9 +1,11 @@
 {
-  "note": "Offline fallbacks so the page is never empty if the World Bank API is unreachable.",
+  "note": "Offline fallbacks for the live World Bank charts, used only when api.worldbank.org is unreachable. Regenerate with `npm run refresh`. Until then these are hand-typed approximations (asOf null).",
+  "source": "World Bank Indicators API (https://api.worldbank.org/v2/country/IND/indicator/{id})",
+  "fetchedAt": null,
   "indicators": {
-    "NY.GDP.MKTP.CD": { "years": [1991, 1995, 2000, 2005, 2010, 2015, 2020, 2022, 2023, 2024], "values": [2.70e11, 3.60e11, 4.68e11, 8.20e11, 1.68e12, 2.10e12, 2.67e12, 3.42e12, 3.57e12, 3.91e12] },
-    "NY.GDP.PCAP.CD": { "years": [1991, 2000, 2010, 2015, 2020, 2024], "values": [303, 443, 1350, 1590, 1913, 2700] },
-    "SP.DYN.LE00.IN": { "years": [1991, 2000, 2010, 2019, 2021, 2023], "values": [58.5, 62.5, 66.7, 70.9, 67.2, 72.0] },
-    "IT.NET.USER.ZS": { "years": [2000, 2010, 2015, 2020, 2023], "values": [0.5, 7.5, 14.9, 43.4, 55.0] }
+    "NY.GDP.MKTP.CD": { "name": "GDP (current US$)",                     "source": "World Bank", "asOf": null, "years": [1991, 1995, 2000, 2005, 2010, 2015, 2020, 2022, 2023, 2024], "values": [2.70e11, 3.60e11, 4.68e11, 8.20e11, 1.68e12, 2.10e12, 2.67e12, 3.42e12, 3.57e12, 3.91e12] },
+    "NY.GDP.PCAP.CD": { "name": "GDP per capita (current US$)",          "source": "World Bank", "asOf": null, "years": [1991, 2000, 2010, 2015, 2020, 2024], "values": [303, 443, 1350, 1590, 1913, 2700] },
+    "SP.DYN.LE00.IN": { "name": "Life expectancy at birth, total (years)", "source": "World Bank", "asOf": null, "years": [1991, 2000, 2010, 2019, 2021, 2023], "values": [58.5, 62.5, 66.7, 70.9, 67.2, 72.0] },
+    "IT.NET.USER.ZS": { "name": "Individuals using the Internet (% of population)", "source": "World Bank", "asOf": null, "years": [2000, 2010, 2015, 2020, 2023], "values": [0.5, 7.5, 14.9, 43.4, 55.0] }
   }
 }

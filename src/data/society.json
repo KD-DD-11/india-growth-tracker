@@ -1,8 +1,8 @@
 {
   "ledger": [
-    { "n": "2.3",  "unit": "%",  "l": "Living in extreme poverty (US$2.15/day)", "s": "World Bank · 2022–23, from 16.2% in 2011–12" },
-    { "n": "80.9", "unit": "%",  "l": "Literacy, age 7 and above",               "s": "PLFS · 2023–24" },
-    { "n": "41.7", "unit": "%",  "l": "Women in the labour force (15+)",          "s": "PLFS · 2023–24, from 23.3% in 2017–18" },
-    { "n": "80",   "unit": "%+", "l": "Rural households with tap water",          "s": "Jal Jeevan Mission · 2025, from 17% in 2019" }
+    { "n": "2.3",  "unit": "%",  "l": "Living in extreme poverty (US$2.15/day)", "source": "World Bank",         "asOf": "2022–23", "note": "from 16.2% in 2011–12" },
+    { "n": "80.9", "unit": "%",  "l": "Literacy, age 7 and above",               "source": "PLFS",               "asOf": "2023–24" },
+    { "n": "41.7", "unit": "%",  "l": "Women in the labour force (15+)",          "source": "PLFS",               "asOf": "2023–24", "note": "from 23.3% in 2017–18" },
+    { "n": "80",   "unit": "%+", "l": "Rural households with tap water",          "source": "Jal Jeevan Mission", "asOf": "2025",    "note": "from 17% in 2019" }
   ]
 }

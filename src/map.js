@@ -8,9 +8,30 @@ import { INK, PEAC, RULE } from './charts.js';
 import pci from './data/map-pci.json';
 import pciDistricts from './data/districts-pci.json';
 
+/* A metric file (src/data/map-<id>.json) is self-describing: `columns.a/.b` carry label, source and
+   asOf; each state carries `a`, `b` and `aStatus` ("verified" | "approximate" | "none").
+   toMetric() flattens that into the shape the renderer uses: { id, name, unit, a, b, india: [a, b],
+   values: { State: [a, b] }, src }. The `src` footnote is generated so it stays truthful as states
+   get verified — with the three verified states of the original it reproduces the original copy. */
+export function toMetric(m) {
+  const values = Object.fromEntries(Object.entries(m.states).map(([n, s]) => [n, [s.a, s.b]]));
+  const approx = Object.entries(m.states).filter(([, s]) => s.aStatus === 'approximate');
+  const verified = Object.entries(m.states).filter(([, s]) => s.aStatus === 'verified').map(([n]) => n);
+  const caveat = approx.length
+    ? ` — typed from memory except ${verified.join(', ')}; verify before publishing.`
+    : '.';
+  return {
+    id: m.id, name: m.name, unit: m.unit,
+    a: m.columns.a.label, b: m.columns.b.label,
+    india: [m.india.a, m.india.b],
+    values,
+    src: `${m.columns.b.label}: ${m.columns.b.source}. ${m.columns.a.label}: ${m.columns.a.source}${caveat}`
+  };
+}
+
 const MAP = {
   topo: import.meta.env.BASE_URL + 'data/india.topojson',
-  metrics: [pci],
+  metrics: [toMetric(pci)],
   districts: pciDistricts
 };
 
