@@ -86,6 +86,32 @@ should be bumped by hand when the underlying JSON changes.
 The footnote under the ranking panel ("typed from memory except Delhi, Haryana, Puducherry; verify before
 publishing") is generated from these flags, so it disappears by itself once every state is `verified`.
 
+### Adding a metric to the map
+
+Drop another `src/data/map-<id>.json` in the same shape (different `id`, `name`, `unit`, column labels)
+and it appears in the "Measure" dropdown; the year buttons take their labels from that file's columns.
+Values are formatted as rupees (lakh notation) when `unit` is `₹`, otherwise as `number unit`.
+Optionally add `src/data/districts-<id>.json` for district figures.
+
+### District figures (CSV → JSON)
+
+Prepare a CSV with the header `state,district,value_a,value_b` (template: `scripts/templates/districts.csv`),
+where `value_a`/`value_b` are the metric's first/second column (blank = no data), then:
+
+```bash
+npm run import:districts -- path/to/districts.csv            # merges into src/data/districts-pci.json
+npm run import:districts -- path/to/file.csv --metric <id>    # for another metric
+npm run import:districts -- path/to/file.csv --replace        # start from empty instead of merging
+```
+
+State names must match the topojson `st_nm` property and district names its `district` property
+(Census 2011 spellings). The importer reports every unmatched row with the nearest names and writes
+nothing until they are fixed. `npm run check:names` re-checks every name already in `src/data`;
+`npm run check` runs both checks.
+
+The file-picker in the side panel (visible once a state is open) previews a CSV in the browser for the
+current metric without saving it; unmatched names are listed in the browser console.
+
 ### Pasting in the corrected 2014-15 column
 
 1. `npm run check:data` prints the states still marked `approximate` with their current values.

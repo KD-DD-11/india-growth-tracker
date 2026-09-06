@@ -5,8 +5,12 @@
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { INK, PEAC, RULE } from './charts.js';
-import pci from './data/map-pci.json';
-import pciDistricts from './data/districts-pci.json';
+
+/* Every src/data/map-<id>.json becomes a metric in the dropdown; the matching
+   src/data/districts-<id>.json (optional) supplies district-level figures for it.
+   To add a metric, add a file — nothing to register here. */
+const metricFiles = import.meta.glob('./data/map-*.json', { eager: true, import: 'default' });
+const districtFiles = import.meta.glob('./data/districts-*.json', { eager: true, import: 'default' });
 
 /* A metric file (src/data/map-<id>.json) is self-describing: `columns.a/.b` carry label, source and
    asOf; each state carries `a`, `b` and `aStatus` ("verified" | "approximate" | "none").
@@ -31,8 +35,9 @@ export function toMetric(m) {
 
 const MAP = {
   topo: import.meta.env.BASE_URL + 'data/india.topojson',
-  metrics: [toMetric(pci)],
-  districts: pciDistricts
+  metrics: Object.keys(metricFiles).sort().map(k => toMetric(metricFiles[k])),
+  // districts[metricId] = { State: { District: [a, b] } }
+  districts: Object.fromEntries(Object.entries(districtFiles).map(([k, v]) => [k.match(/districts-(.+)\.json$/)[1], v]))
 };
 
 export async function initMap() {
@@ -56,14 +61,17 @@ export async function initMap() {
 
   MAP.metrics.forEach(m => sel.add(new Option(m.name, m.id)));
   let metric = MAP.metrics[0], mode = 'b', open = null;
+  const districtsOf = () => (MAP.districts[metric.id] = MAP.districts[metric.id] || {});
+  const yearButtons = document.querySelectorAll('.seg button[data-mode="a"], .seg button[data-mode="b"]');
+  const labelYears = () => yearButtons.forEach(b => { b.textContent = metric[b.dataset.mode]; });
 
   const fmt = v => v == null ? '—' : metric.unit === '₹'
     ? (v >= 1e5 ? '₹' + (v / 1e5).toFixed(2) + ' L' : '₹' + Math.round(v).toLocaleString('en-IN'))
-    : v.toLocaleString('en-IN');
+    : v.toLocaleString('en-IN') + (metric.unit ? ' ' + metric.unit : '');
   const fmtX = x => x == null ? '—' : x.toFixed(1) + '×';
   const valOf = (pair) => !pair ? null : mode === 'a' ? pair[0] : mode === 'b' ? pair[1] : (pair[0] && pair[1] ? pair[1] / pair[0] : null);
   const stateVal = n => valOf(metric.values[n]);
-  const distVal = (s, d) => valOf((MAP.districts[s] || {})[d]);
+  const distVal = (s, d) => valOf((districtsOf()[s] || {})[d]);
 
   let scale;
   function buildScale() {
@@ -84,7 +92,7 @@ export async function initMap() {
     .on('pointerleave', hideTip)
     .on('click', (e, d) => zoomTo(d));
   const dp = gD.selectAll('path').data(districts.features).join('path').attr('d', path).attr('class', 'dt')
-    .on('pointermove', (e, d) => { const s = d.properties.st_nm, n = d.properties.district; const pair = (MAP.districts[s] || {})[n]; showTip(e, n, pair || metric.values[s], pair ? '' : 'state figure — no district data yet'); })
+    .on('pointermove', (e, d) => { const s = d.properties.st_nm, n = d.properties.district; const pair = (districtsOf()[s] || {})[n]; showTip(e, n, pair || metric.values[s], pair ? '' : 'state figure — no district data yet'); })
     .on('pointerleave', hideTip);
 
   function paint() {
@@ -131,7 +139,7 @@ export async function initMap() {
     const f = mode === 'x' ? v => fmtX(v) : fmt;
     if (open) {
       const p = metric.values[open], r = rows.find(r => r.n === open);
-      const dCount = Object.keys(MAP.districts[open] || {}).length;
+      const dCount = Object.keys(districtsOf()[open] || {}).length;
       side.innerHTML = `<h3>${open}</h3>
         <p class="n">${p && p[0] && p[1] ? fmtX(p[1] / p[0]) : '—'}</p>
         <p>${metric.a} ${fmt(p && p[0])} → ${metric.b} ${fmt(p && p[1])}</p>
@@ -149,14 +157,21 @@ export async function initMap() {
     }
   }
 
+  // Quick in-browser preview of a district CSV (state,district,value_a,value_b) for the current metric.
+  // Not persisted — use `npm run import:districts` to write it into src/data/districts-<metric>.json.
+  const known = new Map();
+  districts.features.forEach(f => { const s = f.properties.st_nm; if (!known.has(s)) known.set(s, new Set()); known.get(s).add(f.properties.district); });
   function loadCSV(e) {
     const file = e.target.files[0]; if (!file) return;
     file.text().then(t => {
+      const target = districtsOf(), unmatched = [];
       t.trim().split(/\r?\n/).slice(1).forEach(line => {
         const [s, d, a, b] = line.split(',').map(x => x.trim().replace(/^"|"$/g, ''));
         if (!s || !d) return;
-        (MAP.districts[s] = MAP.districts[s] || {})[d] = [+a || null, +b || null];
+        if (!known.has(s) || !known.get(s).has(d)) unmatched.push(`${s} / ${d}`);
+        (target[s] = target[s] || {})[d] = [+a || null, +b || null];
       });
+      if (unmatched.length) console.warn(`${unmatched.length} CSV row(s) do not match a topojson state/district name and will not shade anything:\n  ` + unmatched.join('\n  '));
       paint();
     });
   }
@@ -166,7 +181,8 @@ export async function initMap() {
     document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
     paint();
   }));
-  sel.addEventListener('change', () => { metric = MAP.metrics.find(m => m.id === sel.value); paint(); });
+  sel.addEventListener('change', () => { metric = MAP.metrics.find(m => m.id === sel.value); labelYears(); paint(); });
 
+  labelYears();
   paint();
 }
