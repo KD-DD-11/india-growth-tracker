@@ -14,6 +14,8 @@ npm run preview   # serve the production build locally
 
 Requires Node 22 (see `.nvmrc`).
 
+`npm run check` validates the data (`check:names` + `check:data`); run it before committing.
+
 ## Layout
 
 ```
@@ -160,3 +162,38 @@ to create and approve pull requests"** on the repo.
 
 To add another World Bank indicator, add its code to `INDICATORS` in `scripts/refresh.js` and a
 `liveChart(...)` call in `src/live.js`, plus a `<canvas>` and caption in `index.html`.
+
+## Deploying to GitHub Pages
+
+`.github/workflows/deploy-pages.yml` builds the site and publishes `dist/` to GitHub Pages on every push
+to `main` (and on demand from the Actions tab). The build sets `BASE_PATH=/<repo-name>/` so assets and the
+topojson resolve under `https://<user>.github.io/<repo-name>/`.
+
+One-time manual setup:
+
+1. Create an empty repository on GitHub (no README, no .gitignore — this repo already has them).
+2. Push:
+   ```bash
+   git remote add origin git@github.com:<user>/<repo-name>.git
+   git push -u origin main
+   ```
+3. On GitHub: **Settings → Pages → Build and deployment → Source**: choose **GitHub Actions**.
+4. **Settings → Actions → General → Workflow permissions**: select **Read and write permissions** and tick
+   **Allow GitHub Actions to create and approve pull requests** (needed by the monthly data-refresh PR).
+5. Open the **Actions** tab. The first "Deploy to GitHub Pages" run was triggered by the push; when it is
+   green the site is at `https://<user>.github.io/<repo-name>/` (the URL is shown on the deploy job).
+
+If you name the repo `<user>.github.io` (a user site served from the root), change `BASE_PATH` in the
+workflow to `/`. For a custom domain, also set `BASE_PATH: /` and add a `public/CNAME` file.
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` / `build` / `preview` | Vite dev server, production build, serve the build |
+| `npm run check` | `check:names` then `check:data` |
+| `npm run check:data` | Every figure has `source` + `asOf`; lists map states still `approximate` |
+| `npm run check:names` | Every state/district name in `src/data` exists in the topojson |
+| `npm run import:pci -- file.csv` | Paste-in importer for the 2014-15 per-capita NSDP column |
+| `npm run import:districts -- file.csv` | CSV (`state,district,value_a,value_b`) → `districts-<metric>.json` |
+| `npm run refresh` | Re-pull World Bank series into `src/data/worldbank.json` |
