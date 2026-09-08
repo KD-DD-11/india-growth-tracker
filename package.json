@@ -11,7 +11,8 @@
     "import:districts": "node scripts/import-districts.js",
     "check:names": "node scripts/check-names.js",
     "check": "npm run check:names && npm run check:data",
-    "refresh": "node scripts/refresh.js"
+    "refresh": "node scripts/refresh.js",
+    "refresh:mospi": "node scripts/refresh-mospi.js"
   },
   "license": "MIT",
   "type": "module",

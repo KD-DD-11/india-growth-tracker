@@ -6,19 +6,17 @@
     "a": {
       "label": "2014-15",
       "source": "RBI Handbook of Statistics on Indian States, Table 19",
+      "sourceType": "government",
       "asOf": "2014-15",
       "note": "Per capita NSDP at current prices. aStatus per state: \"verified\" = checked against Table 19; \"approximate\" = typed from memory, must be verified before publishing; \"none\" = no comparable series."
     },
-    "b": {
-      "label": "2023-24",
-      "source": "MoSPI state series",
-      "asOf": "2023-24"
-    }
+    "b": { "label": "2023-24", "source": "MoSPI state series", "sourceType": "government", "asOf": "2023-24" }
   },
   "india": {
     "a": 86647,
     "b": 188892,
     "source": "MoSPI National Accounts (per capita net national income, current prices)",
+    "sourceType": "government",
     "asOf": "2023-24",
     "status": "verify"
   },

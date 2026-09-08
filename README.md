@@ -34,8 +34,9 @@ public/data/india.topojson state and district boundaries, served as a static fil
 Every hand-entered figure lives in `src/data/*.json`. Edit the JSON, save, and the dev server reloads.
 Nothing numeric is typed into JS or HTML except the hero headline.
 
-**Every figure carries `source` and `asOf`.** `npm run check:data` fails if either is missing, and
-lists which map states still need verifying (see below). Run it before you commit.
+**Every figure carries `source`, `sourceType` and `asOf`.** `npm run check:data` fails if source or
+asOf is missing, lists the figures whose `sourceType` is not `government`, and lists which map states
+still need verifying (see below). Run it before you commit. `docs/sources.md` is the source audit.
 
 | File | What it holds | How to update |
 |---|---|---|
@@ -160,6 +161,19 @@ Actions tab) and opens a pull request titled "Refresh World Bank offline fallbac
 For that to work, enable **Settings → Actions → General → Workflow permissions → "Allow GitHub Actions
 to create and approve pull requests"** on the repo.
 
+### Official MoSPI series
+
+```bash
+npm run refresh:mospi
+```
+
+Pulls GDP growth (quarterly and annual) and GDP levels from MoSPI's eSankhyiki API into
+`src/data/mospi.json`, exactly as returned (several estimate vintages of the same quarter can appear,
+unlabelled). The page does not read this file; use it as the official reference when you update
+`economy.json`. The API blocks browser calls, so it cannot be live on the page. The monthly workflow
+refreshes it too. See `docs/sources.md` for the full audit of which figures are from government
+sources and where the official feeds are.
+
 To add another World Bank indicator, add its code to `INDICATORS` in `scripts/refresh.js` and a
 `liveChart(...)` call in `src/live.js`, plus a `<canvas>` and caption in `index.html`.
 
@@ -197,3 +211,4 @@ workflow to `/`. For a custom domain, also set `BASE_PATH: /` and add a `public/
 | `npm run import:pci -- file.csv` | Paste-in importer for the 2014-15 per-capita NSDP column |
 | `npm run import:districts -- file.csv` | CSV (`state,district,value_a,value_b`) → `districts-<metric>.json` |
 | `npm run refresh` | Re-pull World Bank series into `src/data/worldbank.json` |
+| `npm run refresh:mospi` | Pull official MoSPI GDP series into `src/data/mospi.json` |

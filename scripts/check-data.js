@@ -47,6 +47,23 @@ for (const file of readdirSync(dataDir).filter(f => /^map-.*\.json$/.test(f))) {
   }
 }
 
+// sourceType audit: the site aims to use official Indian government figures only.
+const nonGov = [];
+const walk = (o, where) => {
+  if (Array.isArray(o)) return o.forEach((v, i) => walk(v, `${where}[${i}]`));
+  if (o && typeof o === 'object') {
+    if ('source' in o && o.sourceType !== 'government') nonGov.push(`${where} — ${o.sourceType ?? 'no sourceType'}: ${o.source ?? '(no source)'}`);
+    for (const [k, v] of Object.entries(o)) if (k !== 'indicators') walk(v, `${where}.${k}`);
+  }
+};
+for (const f of ['pulse.json', 'economy.json', 'infra.json', 'society.json', 'map-pci.json']) walk(read(f), f);
+walk(read('worldbank.json').indicators, 'worldbank.json.indicators');
+if (nonGov.length) {
+  console.log(`\n${nonGov.length} figure(s) are not from an Indian government source (see docs/sources.md for the official alternative):\n`);
+  for (const n of nonGov) console.log('  ' + n);
+  console.log('');
+}
+
 // report
 if (approximate.length) {
   console.log(`\n${approximate.length} state(s) still need the ${read('map-pci.json').columns.a.label} column verified against RBI Handbook of Statistics on Indian States, Table 19 (per capita NSDP, current prices):\n`);

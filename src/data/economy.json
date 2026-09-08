@@ -1,12 +1,13 @@
 {
   "ledger": [
-    { "n": "7.8",   "unit": "%",    "l": "Real GDP growth, Q1 FY27",            "source": "MoSPI",   "asOf": "31 Aug 2026" },
-    { "n": "₹81.4", "unit": "L cr", "l": "Real GDP, Q1 FY27 at 2022–23 prices", "source": "MoSPI",   "asOf": "31 Aug 2026" },
-    { "n": "10.3",  "unit": "%",    "l": "Nominal GDP growth, Q1 FY27",         "source": "MoSPI",   "asOf": "31 Aug 2026" },
-    { "n": "4th",   "unit": "",     "l": "Largest economy by nominal GDP",       "source": "IMF WEO", "asOf": "2025" }
+    { "n": "7.8", "unit": "%", "l": "Real GDP growth, Q1 FY27", "source": "MoSPI", "sourceType": "government", "asOf": "31 Aug 2026" },
+    { "n": "₹81.4", "unit": "L cr", "l": "Real GDP, Q1 FY27 at 2022–23 prices", "source": "MoSPI", "sourceType": "government", "asOf": "31 Aug 2026" },
+    { "n": "10.3", "unit": "%", "l": "Nominal GDP growth, Q1 FY27", "source": "MoSPI", "sourceType": "government", "asOf": "31 Aug 2026" },
+    { "n": "4th", "unit": "", "l": "Largest economy by nominal GDP", "source": "IMF WEO", "sourceType": "multilateral", "asOf": "2025" }
   ],
   "quarters": {
     "source": "MoSPI",
+    "sourceType": "government",
     "asOf": "31 Aug 2026",
     "note": "Real GDP growth by quarter, year on year, %, at 2022–23 prices. null = not yet entered (Q3 FY26 is deliberately null). Q1 FY26 and Q4 FY26 are revised figures per the Aug 2026 release.",
     "labels": ["Q1 FY25", "Q2 FY25", "Q3 FY25", "Q4 FY25", "Q1 FY26", "Q2 FY26", "Q3 FY26", "Q4 FY26", "Q1 FY27"],
