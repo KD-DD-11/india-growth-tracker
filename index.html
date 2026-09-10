@@ -15,6 +15,7 @@
     <a class="brand" href="#top">India, counted</a>
     <nav aria-label="Sections">
       <a href="#economy">Economy</a>
+      <a href="#compare">Compare</a>
       <a href="#states">By state</a>
       <a href="#infra">Infrastructure and tech</a>
       <a href="#society">Society</a>
@@ -56,6 +57,18 @@
         <div class="ch"><canvas id="c-pcap"></canvas></div>
       </figure>
     </div>
+  </section>
+
+  <!-- COMPARE PERIODS -->
+  <section id="compare">
+    <h2>Compare periods</h2>
+    <p class="lede">The same series in three windows. Choose the years in each panel to set one stretch of growth against another.</p>
+    <div class="map-controls">
+      <select id="cmp-metric" aria-label="Series"></select>
+      <span class="src" id="src-cmp">connecting to World Bank</span>
+    </div>
+    <div class="compare" id="compare-panels"></div>
+    <p class="note" style="font-size:.8rem;color:var(--ink-soft);margin-top:12px">World Bank series run from 1960; earlier years will appear here once an official long-run series is added to the data files.</p>
   </section>
 
   <!-- BY STATE / DISTRICT -->

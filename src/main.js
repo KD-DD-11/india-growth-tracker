@@ -6,6 +6,7 @@ import society from './data/society.json';
 import { ledger, pulse, thenNow, quartersChart, upiChart, highwaysChart } from './charts.js';
 import { liveCharts } from './live.js';
 import { initMap } from './map.js';
+import { initCompare } from './compare.js';
 
 /* ---------- ledgers, pulse, then/now ---------- */
 ledger('ledger-econ', economy.ledger);
@@ -21,6 +22,9 @@ highwaysChart(infra.highways);
 
 /* ---------- live World Bank series ---------- */
 liveCharts();
+
+/* ---------- compare periods ---------- */
+initCompare();
 
 /* ---------- state / district map ---------- */
 initMap();

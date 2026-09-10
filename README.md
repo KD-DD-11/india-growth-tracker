@@ -23,7 +23,8 @@ index.html                 page markup (copy lives here)
 src/styles.css             all styling
 src/main.js                entry point: wires data to renderers, nav highlight
 src/charts.js              Chart.js defaults, theme colours, ledgers, pulse, then/now table, embedded charts
-src/live.js                World Bank live series + offline fallback
+src/live.js                World Bank live series + offline fallback, shared series cache
+src/compare.js             "Compare periods": three year-selectable panels on the same series
 src/map.js                 D3 choropleth (states → districts), tooltip, ranking panel, CSV upload
 src/data/                  every hand-entered figure, as JSON (see below)
 public/data/india.topojson state and district boundaries, served as a static file
@@ -144,6 +145,16 @@ State names in `map-*.json` must match the `st_nm` property and district names t
 Four charts pull from the World Bank Indicators API on each page load (`NY.GDP.MKTP.CD`,
 `NY.GDP.PCAP.CD`, `SP.DYN.LE00.IN`, `IT.NET.USER.ZS`). The dot next to the caption turns green
 when live and red when the page has fallen back to `src/data/worldbank.json`.
+
+### Compare periods
+
+The "Compare periods" section shows one of the four series in three panels, each with its own start
+and end year, with a headline for the window (× and % a year for money series, + units and per year for
+life expectancy and internet use). Defaults are 1991–2001, 2004–2014 and 2014–2024, set in
+`DEFAULT_PERIODS` in `src/compare.js`. The panels read the same cached series as the section charts
+(`getSeries()` in `src/live.js`), so anything added to `METRICS` there appears in the dropdown. World Bank
+data starts in 1960; to go back to 1947 add an official long-run series as another `METRICS` entry backed
+by a JSON file.
 
 ### Refreshing the offline fallback
 

@@ -116,6 +116,17 @@ td.num{font-family:"Fraunces",serif;font-size:1.25rem;letter-spacing:-.01em;whit
 td.delta{color:var(--peacock);font-weight:600;white-space:nowrap}
 @media (max-width:560px){td.num{font-size:1.05rem}th,td{padding:10px 6px 10px 0}}
 
+/* compare periods */
+.compare{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:22px}
+@media (max-width:800px){.compare{grid-template-columns:1fr;gap:24px}}
+.compare figure{border-top:1px solid var(--rule);padding-top:14px}
+.cmp-years{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--ink-soft)}
+.cmp-years select{font:inherit;font-size:.88rem;color:var(--ink);background:none;border:1px solid var(--rule);padding:4px 6px}
+.compare .n{font-family:"Fraunces",serif;font-variation-settings:"opsz" 96;font-weight:400;font-size:2.1rem;line-height:1;letter-spacing:-.02em;margin:14px 0 4px}
+.compare .n small{font-size:.5em}
+.compare .s{margin:0 0 10px;font-size:.8rem;color:var(--ink-soft)}
+.compare .ch{height:180px}
+
 footer{margin-top:56px;padding:28px 0 48px;border-top:1px solid var(--rule);color:var(--ink-soft);font-size:.85rem}
 footer p{margin:0 0 8px;max-width:80ch}
 footer ul{margin:10px 0 0;padding-left:18px}
