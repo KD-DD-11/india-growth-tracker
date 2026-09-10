@@ -12,6 +12,7 @@ const pct = x => (x * 100).toFixed(1) + '%';
 
 function summarise(m, years, values) {
   const y0 = years[0], y1 = years[years.length - 1], v0 = values[0], v1 = values[values.length - 1], n = y1 - y0;
+  if (!(v0 > 0) || !(v1 > 0)) return { big: '—', small: '', detail: 'no data for one end of this window' };
   if (m.kind === 'ratio') {
     const ratio = v1 / v0, cagr = Math.pow(ratio, 1 / n) - 1;
     return { big: ratio.toFixed(1), small: '×', detail: `${pct(cagr)} a year · ${m.fmt(v0)} → ${m.fmt(v1)}` };
@@ -38,13 +39,14 @@ export async function initCompare() {
     return p;
   });
 
+  const label = i => series.labels ? series.labels[i] : String(series.years[i]);
   function fillYears(p) {
     const ys = series.years;
     p.from = Math.max(ys[0], Math.min(p.from, ys.at(-1) - 1));
     p.to = Math.max(p.from + 1, Math.min(p.to, ys.at(-1)));
     for (const [s, chosen] of [[p.selFrom, p.from], [p.selTo, p.to]]) {
       s.innerHTML = '';
-      ys.forEach(y => s.add(new Option(y, y, false, y === chosen)));
+      ys.forEach((y, i) => s.add(new Option(label(i), y, false, y === chosen)));
     }
   }
 
@@ -52,13 +54,14 @@ export async function initCompare() {
     fillYears(p);
     const i0 = series.years.indexOf(p.from), i1 = series.years.indexOf(p.to);
     const years = series.years.slice(i0, i1 + 1), values = series.values.slice(i0, i1 + 1);
+    const labels = series.labels ? series.labels.slice(i0, i1 + 1) : years;
     const sum = summarise(metric, years, values);
     p.n.innerHTML = `${sum.big}<small> ${sum.small}</small>`;
     p.s.textContent = sum.detail;
     if (p.chart) p.chart.destroy();
     p.chart = new Chart(p.fig.querySelector('canvas'), {
       type: 'line',
-      data: { labels: years, datasets: [{ data: values, borderColor: metric.color, borderWidth: 2, pointRadius: 0, pointHitRadius: 12, tension: .25, fill: true, backgroundColor: metric.color + '14' }] },
+      data: { labels, datasets: [{ data: values, borderColor: metric.color, borderWidth: 2, pointRadius: 0, pointHitRadius: 12, tension: .25, fill: true, backgroundColor: metric.color + '14' }] },
       options: { maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
         scales: { x: { ...scaleX, ticks: { ...scaleX.ticks, maxTicksLimit: 4 } }, y: { ...scaleY(metric.fmt), ticks: { callback: metric.fmt, maxTicksLimit: 4 } } },
         plugins: { tooltip: { callbacks: { label: c => metric.fmt(c.parsed.y) } } } }
@@ -67,10 +70,9 @@ export async function initCompare() {
 
   async function load() {
     src.textContent = 'connecting to World Bank'; src.className = 'src';
-    series = await getSeries(metric.id);
-    const last = series.years.at(-1);
-    src.textContent = series.live ? `live, World Bank, ${series.years[0]}–${last}` : `offline, using saved data ${series.years[0]}–${last}`;
-    src.className = 'src ' + (series.live ? 'live' : 'err');
+    series = await getSeries(metric);
+    src.textContent = series.caption;
+    src.className = 'src ' + ({ live: 'live', offline: 'err', embedded: '' })[series.status];
     panels.forEach(paint);
   }
 

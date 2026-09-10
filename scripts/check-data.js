@@ -28,6 +28,11 @@ for (const file of ['economy.json', 'infra.json', 'society.json']) {
   (d.thenNow || []).forEach((r, i) => need(r, `${file} thenNow[${i}] "${r.k}"`));
 }
 
+// derived MoSPI long-run GDP series
+const lr = read('gdp-long-run.json');
+need(lr, 'gdp-long-run.json');
+if (lr.years.length !== lr.real.length || lr.years.length !== lr.labels.length) problems.push('gdp-long-run.json: years/labels/real arrays differ in length');
+
 // world bank fallbacks
 const wb = read('worldbank.json');
 need(wb, 'worldbank.json', ['source']);
@@ -56,7 +61,7 @@ const walk = (o, where) => {
     for (const [k, v] of Object.entries(o)) if (k !== 'indicators') walk(v, `${where}.${k}`);
   }
 };
-for (const f of ['pulse.json', 'economy.json', 'infra.json', 'society.json', 'map-pci.json']) walk(read(f), f);
+for (const f of ['pulse.json', 'economy.json', 'infra.json', 'society.json', 'map-pci.json', 'gdp-long-run.json']) walk(read(f), f);
 walk(read('worldbank.json').indicators, 'worldbank.json.indicators');
 if (nonGov.length) {
   console.log(`\n${nonGov.length} figure(s) are not from an Indian government source (see docs/sources.md for the official alternative):\n`);
