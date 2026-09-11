@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "type": "module",
-  "private": "true",
+  "private": true,
   "dependencies": {
     "chart.js": "4.4.1",
     "d3": "7.9.0",
@@ -24,5 +24,13 @@
   },
   "devDependencies": {
     "vite": "6.3.5"
+  },
+  "homepage": "https://KD-DD-11.github.io/india-growth-tracker/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KD-DD-11/india-growth-tracker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KD-DD-11/india-growth-tracker/issues"
   }
 }
