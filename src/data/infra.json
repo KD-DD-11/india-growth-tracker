@@ -43,7 +43,29 @@
       "sourceType": "government",
       "asOf": "Aug 2026"
     },
-    { "k": "Operational airports", "a": "74", "b": "160+", "d": "~2×", "source": null, "sourceType": "unknown", "asOf": "2025" },
-    { "k": "Metro rail in operation", "a": "~250 km", "b": "1,000+ km", "d": "~4×", "source": null, "sourceType": "unknown", "asOf": "2025" }
+    {
+      "k": "Operational airports",
+      "a": "74",
+      "b": "165",
+      "d": "2.2×",
+      "source": "MoCA via PIB",
+      "sourceType": "government",
+      "asOf": "15 Jul 2026",
+      "url": "https://static.pib.gov.in/WriteReadData/specificdocs/documents/2026/jul/doc2026717924201.pdf",
+      "quote": "The number of operational airports increased from 74 in 2014 to 165 as of 15th July 2026.",
+      "note": "PIB backgrounder \"Modified UDAN: Strengthening India's Regional Aviation Network\", 17 July 2026, page 1. The document says \"operational airports\" and gives no breakdown, so do not describe the 165 as including heliports or water aerodromes — that wording belongs to a different, smaller UDAN-network count (95) in the same document. Corroborated by the PIB factsheet of 12 Aug 2026: \"Operational airports increased from 74 in 2014 to 165 in July 2026.\""
+    },
+    {
+      "k": "Metro rail in operation",
+      "a": "248 km",
+      "b": "1,155+ km",
+      "d": "4.7×",
+      "source": "MoHUA via PIB",
+      "sourceType": "government",
+      "asOf": "Aug 2026",
+      "url": "https://www.pib.gov.in/FactsheetDetails.aspx?ModuleId=16&NoteId=150842&id=150842&reg=48&lang=2",
+      "quote": "Metro network expanded from 248 km in 2014 to over 1,155 km in 2026.",
+      "note": "PIB factsheet \"India's Infrastructure Transformation: From Connectivity to Capacity\", 12 Aug 2026. The same section adds that cities with metro connectivity rose from 5 to 26. Definition caveat: MoHUA's recent totals include the 55 km Delhi-Meerut RRTS (Namo Bharat), while the 2014 baseline is metro only because RRTS did not exist then. MoHUA's Annual Report 2025-26 gives about 1,096 km as on 15 Jan 2026 on the same basis."
+    }
   ]
 }

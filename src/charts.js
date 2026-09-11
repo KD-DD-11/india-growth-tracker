@@ -43,10 +43,17 @@ export function pulse(p) {
   document.getElementById('pulse-t').innerHTML = p.text + ` <span style="color:var(--ink-soft)">${p.source}, ${p.asOf}.</span>`;
 }
 
-/* ---------- then / now ---------- */
+/* ---------- then / now ----------
+   The row's provenance line matches the ledger tiles: "source · asOf", linked when the row records the
+   document it was read from. It used to print the date alone, so a reader could not tell where the
+   figures came from even for the rows that had a source. */
 export function thenNow(rows) {
+  const provenance = r => {
+    const text = r.source ? `${r.source} · ${r.asOf}` : r.asOf;
+    return r.url ? `<a href="${r.url}" target="_blank" rel="noopener">${text}</a>` : text;
+  };
   document.querySelector('#thennow tbody').innerHTML = rows.map(r =>
-    `<tr><td>${r.k}<br><span class="src" style="white-space:normal">${r.asOf}</span></td><td class="num">${r.a}</td><td class="num">${r.b}</td><td class="delta">${r.d}</td></tr>`).join('');
+    `<tr><td>${r.k}<br><span class="src" style="white-space:normal">${provenance(r)}</span></td><td class="num">${r.a}</td><td class="num">${r.b}</td><td class="delta">${r.d}</td></tr>`).join('');
 }
 
 /* ---------- embedded charts ---------- */

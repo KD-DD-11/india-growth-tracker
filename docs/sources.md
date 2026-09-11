@@ -41,8 +41,8 @@ to copy or units, so it is a deliberate edit, not a restructure. **Verify** = fi
 | Then/now | Highways, expressways | MoRTH | Gov | |
 | Then/now | Major port capacity | MoPSW | Gov | MoPSW / PIB |
 | Then/now | UPI per month | NPCI | Gov | |
-| Then/now | Operational airports (74 → 160+) | none recorded | Verify | Ministry of Civil Aviation / AAI via PIB — record the release |
-| Then/now | Metro rail km (~250 → 1,000+) | none recorded | Verify | Ministry of Housing and Urban Affairs via PIB — record the release |
+| Then/now | Operational airports, 74 (2014) → 165 (15 Jul 2026) | PIB backgrounder, Ministry of Civil Aviation | **Gov, verified 12 Sep 2026** | See below |
+| Then/now | Metro rail, 248 km (2014) → 1,155+ km (2026) | PIB factsheet, MoHUA content | **Gov, verified 12 Sep 2026** | See below |
 | Society tile | 2.3% in extreme poverty (US$2.15/day) | World Bank | Swap | No Indian government series on the $2.15 line. Official alternatives measure something different: NITI Aayog Multidimensional Poverty Index (2023 discussion paper), or MoSPI HCES 2022-23/2023-24 consumption data (via the MoSPI API `/hces`). Changing the tile changes its label. |
 | Society tile | Literacy 80.9% | PLFS 2023-24 (MoSPI) | Gov | MoSPI API `/plfs` |
 | Society tile | Women in the labour force 41.7% | PLFS 2023-24 | Gov | MoSPI API `/plfs` indicator 1 (LFPR), verified reachable |
@@ -86,10 +86,40 @@ Still not published, by design: **the all-India baseline**. Neither RBI Table 19
 measure from per capita NSDP anyway. The side panel simply omits the India line until you supply a
 figure read off a MoSPI release.
 
+## Airports and metro: sourced 12 September 2026
+
+Both rows previously carried no source. Each figure below was fetched and read directly.
+
+**Operational airports — 74 (2014) to 165 (as on 15 July 2026).**
+PIB backgrounder, *Modified UDAN: Strengthening India's Regional Aviation Network*, 17 July 2026, page 1:
+"The number of operational airports increased from 74 in 2014 to 165 as of 15th July 2026."
+`static.pib.gov.in/WriteReadData/specificdocs/documents/2026/jul/doc2026717924201.pdf`
+Corroborated by the PIB factsheet of 12 August 2026: "Operational airports increased from 74 in 2014 to
+165 in July 2026."
+
+*Definition trap, do not repeat it.* The document says only "operational airports" and gives no breakdown.
+Do **not** describe the 165 as including heliports and water aerodromes. That wording belongs to a
+different and smaller count in the same document — the 95 airports, heliports and water aerodromes on the
+UDAN network. The two share an as-on date, which is exactly why they get conflated.
+
+**Metro rail — 248 km (2014) to over 1,155 km (2026).**
+PIB factsheet, *India's Infrastructure Transformation: From Connectivity to Capacity*, 12 August 2026:
+"Metro network expanded from 248 km in 2014 to over 1,155 km in 2026", with cities rising from 5 to 26.
+`pib.gov.in/FactsheetDetails.aspx?ModuleId=16&NoteId=150842&id=150842&reg=48&lang=2`
+
+*Definition caveat.* MoHUA's recent totals include the 55 km Delhi–Meerut RRTS (Namo Bharat), while the
+2014 baseline is metro only, because RRTS did not exist then. The government publishes the comparison
+that way itself, so the row follows it, but the two endpoints are not quite the same measure. MoHUA's
+Annual Report 2025-26 gives about 1,096 km as on 15 January 2026 on the same basis, and a Lok Sabha answer
+of 18 December 2025 gives 1,083 km across 25 cities — the series is consistent, it simply grows.
+
+The "Then and now" table now prints `source · asOf` under each row and links the two rows that record the
+document they came from. Before this it printed only a date, so even the rows that had a source did not
+show it.
+
 ## Recommended order of work
 
-1. Fill in the two missing sources (airports, metro) from the PIB releases you took the numbers from.
-2. Source the all-India per-capita baseline from a MoSPI publication, or drop the India comparison.
+1. Source the all-India per-capita baseline from a MoSPI publication, or drop the India comparison.
 3. Decide on the four World Bank charts. Two honest options: keep them as clearly-labelled World Bank
    series (they are compiled from MoSPI and RGI data anyway), or replace them with MoSPI ₹ series from
    `src/data/mospi.json` and update the captions. The refresh script already delivers the data for the
