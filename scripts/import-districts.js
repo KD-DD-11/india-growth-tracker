@@ -29,9 +29,15 @@ const metricPath = join(root, 'src', 'data', `map-${metricId}.json`);
 if (!existsSync(metricPath)) { console.error(`No metric file ${metricPath}. Create it first (copy map-pci.json).`); process.exit(2); }
 const outPath = join(root, 'src', 'data', `districts-${metricId}.json`);
 
-const rows = parseCSV(readFileSync(file, 'utf8'));
+const csv = readFileSync(file, 'utf8');
+if (!csv.trim()) { console.error(`${file} is empty; nothing written.`); process.exit(2); }
+const rows = parseCSV(csv);
 const required = ['state', 'district', 'value_a', 'value_b'];
-const missing = required.filter(c => rows.length && !(c in rows[0]));
+// This bail MUST precede the header check: without it, `'state' in rows[0]` throws on an empty body,
+// and the old `rows.length &&` guard silently passed a header-only file straight through to --replace,
+// which then emptied districts-<metric>.json and reported success.
+if (!rows.length) { console.error(`${file} has a header but no data rows; nothing written.`); process.exit(2); }
+const missing = required.filter(c => !(c in rows[0]));
 if (missing.length) { console.error(`CSV header must be: ${required.join(',')} (missing: ${missing.join(', ')})`); process.exit(2); }
 
 const topo = loadTopo(root);

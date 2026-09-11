@@ -1,5 +1,10 @@
-# Compact JSON formatter used by the data scripts: objects whose values are all scalars, and arrays of
-# scalars, go on one line (if short enough); everything else is indented normally.
+# NOT wired into any script or workflow — the data pipeline is Node-only, and this repo needs no Python.
+# This is the reference implementation of the compact JSON layout that the Node scripts each reproduce
+# inline with regexes (scripts/import-pci-baseline.js, scripts/import-districts.js, scripts/refresh-mospi.js).
+# Run it by hand if you ever need to re-lay-out a data file:  python3 scripts/lib/format-json.py FILE...
+#
+# Layout: objects whose values are all scalars, and arrays of scalars, go on one line when short
+# enough; everything else is indented normally.
 import json, sys
 def scalar(v): return v is None or isinstance(v,(str,int,float,bool))
 def fmt(o, ind=0, width=150):

@@ -141,7 +141,11 @@ export async function initMap() {
   document.getElementById('map-back').addEventListener('click', reset);
 
   function renderSide() {
-    const rows = Object.entries(metric.values).filter(([, p]) => p && p[0] && p[1]).map(([n, p]) => ({ n, a: p[0], b: p[1], x: p[1] / p[0] }));
+    // A state belongs in the ranking when it has a published figure for the year on screen. Only the
+    // change view needs both ends, so suppressing an unverified 2014-15 figure must not drop that state
+    // out of the 2023-24 ranking, where its figure is official.
+    const shown = p => mode === 'a' ? p[0] > 0 : mode === 'b' ? p[1] > 0 : (p[0] > 0 && p[1] > 0);
+    const rows = Object.entries(metric.values).filter(([, p]) => p && shown(p)).map(([n, p]) => ({ n, a: p[0], b: p[1], x: ratio(p[0], p[1]) }));
     const key = mode === 'x' ? 'x' : mode === 'a' ? 'a' : 'b';
     rows.sort((p, q) => q[key] - p[key]);
     const f = mode === 'x' ? v => fmtX(v) : fmt;
@@ -156,11 +160,15 @@ export async function initMap() {
         <div class="csv">Add district figures as CSV: <code>state,district,${metric.a},${metric.b}</code><input type="file" accept=".csv" id="csv"></div>`;
       document.getElementById('csv').addEventListener('change', loadCSV);
     } else {
-      const top = rows.slice(0, 5), bottom = rows.slice(-5);
+      // With ten or fewer rows a top-5 / bottom-5 split would overlap and list the same states twice,
+      // so show the whole ranking instead of an elided head and tail.
+      const elide = rows.length > 10;
+      const head = elide ? rows.slice(0, 5) : rows, tail = elide ? rows.slice(-5) : [];
       const li = r => `<li><span>${r.n}</span><span>${f(r[key])}</span></li>`;
+      const gap = elide ? '<li style="border-top-style:dashed;color:var(--ink-soft)"><span>…</span><span></span></li>' : '';
       side.innerHTML = `<h3>${mode === 'x' ? 'Fastest and slowest' : 'Highest and lowest'}, ${mode === 'x' ? metric.a + ' to ' + metric.b : mode === 'a' ? metric.a : metric.b}</h3>
         <p class="s">India: ${mode === 'x' ? fmtX(ratio(metric.india[0], metric.india[1])) : fmt(metric.india[mode === 'a' ? 0 : 1])}</p>
-        <ul class="rank">${top.map(li).join('')}<li style="border-top-style:dashed;color:var(--ink-soft)"><span>…</span><span></span></li>${bottom.map(li).join('')}</ul>
+        <ul class="rank">${head.map(li).join('')}${gap}${tail.map(li).join('')}</ul>
         <p class="s" style="margin-top:12px">${metric.src}</p>`;
     }
   }

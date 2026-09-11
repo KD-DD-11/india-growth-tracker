@@ -14,7 +14,11 @@ import { parseCSV, stateNames, reportUnmatched } from './lib/topo-names.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
-const file = args.find(a => !a.startsWith('--') && args[args.indexOf(a) - 1]?.startsWith('--') === false) || args.find(a => !a.startsWith('--'));
+// The CSV path is the first bare token that is not the value of a value-taking flag. Without the
+// flag set, `--metric pci` alone made "pci" look like the filename and produced a raw ENOENT stack
+// instead of the usage message.
+const VALUE_FLAGS = new Set(['--metric', '--column', '--status']);
+const file = args.find((a, i) => !a.startsWith('--') && !(i > 0 && VALUE_FLAGS.has(args[i - 1])));
 const metricId = opt('--metric', 'pci'), column = opt('--column', 'a'), status = opt('--status', 'verified');
 if (!file) { console.error('usage: npm run import:pci -- <file.csv> [--metric pci] [--column a|b] [--status verified]'); process.exit(2); }
 

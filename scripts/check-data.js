@@ -48,6 +48,7 @@ for (const file of readdirSync(dataDir).filter(f => /^map-.*\.json$/.test(f))) {
   for (const [name, s] of Object.entries(m.states)) {
     if (!['verified', 'approximate', 'none'].includes(s.aStatus)) problems.push(`${file} ${name}: aStatus must be verified | approximate | none`);
     if (s.aStatus === 'approximate') approximate.push({ file, name, a: s.a });
+    if (s.aStatus === 'approximate' && s.a == null) problems.push(`${file} ${name}: aStatus "approximate" but a is null — use "none" instead`);
     if (s.aStatus === 'none' && s.a != null) problems.push(`${file} ${name}: aStatus "none" but a = ${s.a}`);
   }
 }
@@ -69,16 +70,19 @@ if (nonGov.length) {
   console.log('');
 }
 
-// report
-if (approximate.length) {
-  console.log(`\n${approximate.length} state(s) still need the ${read('map-pci.json').columns.a.label} column verified against RBI Handbook of Statistics on Indian States, Table 19 (per capita NSDP, current prices):\n`);
-  for (const { name, a } of approximate) console.log(`  ${name.padEnd(42)} currently ${a.toLocaleString('en-IN')}`);
-  console.log('\nPaste the corrected column into a CSV (state,value) and run: npm run import:pci -- <file.csv>');
-  console.log('A template with every state name is in scripts/templates/pci-2014-15.csv\n');
-}
+/* Report. `problems` prints first and sets a failing exit code without returning, so the advisory
+   sections below still run — an early process.exit() here used to swallow them, and vice versa. */
 if (problems.length) {
   console.error('Data problems:');
   for (const p of problems) console.error('  - ' + p);
-  process.exit(1);
+  process.exitCode = 1;
+} else {
+  console.log('All figures carry source and asOf.');
 }
-console.log(problems.length ? '' : 'All figures carry source and asOf.');
+
+if (approximate.length) {
+  console.log(`\n${approximate.length} state(s) are NOT published on the map because the ${read('map-pci.json').columns.a.label} column is still unverified. Check them against RBI Handbook of Statistics on Indian States, Table 19 (per capita NSDP, current prices):\n`);
+  for (const { name, a } of approximate) console.log(`  ${name.padEnd(42)} currently ${a == null ? '(no value)' : a.toLocaleString('en-IN')}`);
+  console.log('\nPaste the corrected column into a CSV (state,value) and run: npm run import:pci -- <file.csv>');
+  console.log('A template with every state name is in scripts/templates/pci-2014-15.csv\n');
+}

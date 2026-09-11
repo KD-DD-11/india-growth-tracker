@@ -1,7 +1,12 @@
-# Monthly refresh of the World Bank offline fallback (src/data/worldbank.json) and the official MoSPI
-# reference series (src/data/mospi.json), delivered as a PR.
+# Monthly refresh of the data files, delivered as pull requests.
+#
+# Two independent jobs on purpose: api.mospi.gov.in is an old endpoint (it needs legacy TLS
+# renegotiation) and the World Bank API has its own outages. Run in one job, whichever came second
+# failing would discard the first one's completed work and the next attempt would be 30 days later.
+# Split, each opens its own PR and one being down costs nothing but that PR.
+#
 # Needs: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
-name: Refresh World Bank data
+name: Refresh World Bank and MoSPI data
 
 on:
   schedule:
@@ -13,8 +18,9 @@ permissions:
   pull-requests: write
 
 jobs:
-  refresh:
+  worldbank:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,19 +29,68 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run refresh
-      - run: npm run refresh:mospi
-      - run: npm run check:names
       - name: Open a pull request if anything changed
         uses: peter-evans/create-pull-request@v7
         with:
           branch: chore/refresh-worldbank
           delete-branch: true
+          add-paths: src/data/worldbank.json
           commit-message: 'Refresh World Bank offline fallback'
           title: 'Refresh World Bank offline fallback'
           body: |
             Automated monthly run of `npm run refresh`.
 
-            It re-pulls NY.GDP.MKTP.CD, NY.GDP.PCAP.CD, SP.DYN.LE00.IN and IT.NET.USER.ZS for India from
-            the World Bank Indicators API into `src/data/worldbank.json`, and the official MoSPI GDP series
-            into `src/data/mospi.json`. Check the diff for a new latest year or revised values, then merge.
+            Re-pulls NY.GDP.MKTP.CD, NY.GDP.PCAP.CD, SP.DYN.LE00.IN and IT.NET.USER.ZS for India from
+            the World Bank Indicators API into `src/data/worldbank.json`, the offline fallback the page
+            uses when the API is unreachable from the browser. Check the diff for a new latest year or
+            revised values, then merge.
+          labels: data
+
+  mospi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run refresh:mospi
+      - run: npm run check:names
+      # The script's own guards abort before writing, so reaching this step means files were written.
+      # This asserts the invariants that matter to the page, which check:names does not look at.
+      - name: Sanity-check the refreshed series
+        run: |
+          node -e "
+            const lr = require('./src/data/gdp-long-run.json');
+            if (lr.labels[0] !== '1950-51') throw new Error('long-run series no longer starts at 1950-51: ' + lr.labels[0]);
+            if (lr.years.length < 76) throw new Error('long-run series shrank to ' + lr.years.length + ' points');
+            for (const k of ['real', 'nominal']) {
+              if (lr[k].length !== lr.years.length) throw new Error(k + ' length does not match years');
+              const bad = lr[k].findIndex(v => !(v > 0));
+              if (bad >= 0) throw new Error('non-positive ' + k + ' GDP at ' + lr.labels[bad]);
+            }
+            console.log('gdp-long-run.json ok: ' + lr.years.length + ' years, ' + lr.labels[0] + ' to ' + lr.labels.at(-1));
+          "
+      - name: Open a pull request if anything changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/refresh-mospi
+          delete-branch: true
+          add-paths: |
+            src/data/mospi.json
+            src/data/gdp-long-run.json
+          commit-message: 'Refresh MoSPI National Accounts series'
+          title: 'Refresh MoSPI National Accounts series'
+          body: |
+            Automated monthly run of `npm run refresh:mospi`.
+
+            Re-pulls the National Accounts series from MoSPI's eSankhyiki API into `src/data/mospi.json`
+            (raw rows, as returned) and rebuilds `src/data/gdp-long-run.json`, the derived GDP series from
+            1950-51 at 2011-12 prices that `src/live.js` imports for the compare panels.
+
+            The script refuses to write if the series would shrink, start later, contain a non-positive
+            value, or carry a revision label it does not recognise — so if this PR exists, those guards
+            passed. Check the diff for a new year or a revised vintage, then merge.
           labels: data

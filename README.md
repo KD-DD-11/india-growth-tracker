@@ -62,7 +62,6 @@ should be bumped by hand when the underlying JSON changes.
   bar is drawn grey with the tooltip "not yet entered". Replace the `null` with the figure when you have it.
 - **"Operational airports" and "Metro rail in operation"** in `infra.json` → `thenNow` have `source: null`
   because the original page did not record one. `check:data` will keep flagging them until you fill them in.
-- **World Bank fallbacks** have `asOf: null` until `npm run refresh` has run once.
 
 ## Map data
 
@@ -80,16 +79,22 @@ should be bumped by hand when the underlying JSON changes.
 }
 ```
 
-`aStatus` says how much to trust the 2014-15 column for that state:
+`aStatus` decides whether a state's 2014-15 figure is **published at all**. Only `verified` reaches the page:
 
-| `aStatus` | Meaning |
-|---|---|
-| `verified` | Checked against RBI Handbook of Statistics on Indian States, **Table 19 — per capita NSDP, current prices** |
-| `approximate` | Typed from memory. **30 states are in this state today.** Verify before publishing |
-| `none` | No comparable 2014-15 series (Ladakh, Lakshadweep, DNH & DD); `a` is `null` and the state is left grey in that view |
+| `aStatus` | Meaning | On the page |
+|---|---|---|
+| `verified` | Checked against RBI Handbook of Statistics on Indian States, **Table 19 — per capita NSDP, current prices** | Shaded, ranked, shown in the tooltip |
+| `approximate` | Typed from memory, not checked against that table. **30 states are in this state today.** | Not published: grey, out of the ranking, "no comparable baseline" in the tooltip |
+| `none` | No comparable 2014-15 series (Ladakh, Lakshadweep, DNH & DD); `a` is `null` | Not published, same as `approximate` |
 
-The footnote under the ranking panel ("typed from memory except Delhi, Haryana, Puducherry; verify before
-publishing") is generated from these flags, so it disappears by itself once every state is `verified`.
+This is deliberate. The page cites Table 19 as the source for that column, so a figure that has not been
+checked against Table 19 must not appear under that citation. The 2023-24 column is unaffected: it comes
+from the MoSPI state series and every state is published and ranked in that view. The all-India baseline
+follows the same rule through `india.status`, which is why the 2014-15 view currently shows "India: —".
+
+The footnote under the ranking panel is generated from these flags ("published so far for Delhi, Haryana,
+Puducherry; the other 30 are still being checked against that table"), so it disappears by itself once every
+state is `verified`.
 
 ### Adding a metric to the map
 
