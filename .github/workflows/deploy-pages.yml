@@ -1,5 +1,10 @@
 # Builds the site and deploys it to GitHub Pages on every push to main.
-# One-time setup: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+#
+# One-time setup, done by hand in the repo settings (a workflow cannot do it for you: the
+# `enablement` input of configure-pages needs a personal access token, not the default GITHUB_TOKEN):
+#   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+# If that is not set when a run starts, the "Configure Pages" step below fails with
+# "Get Pages site failed" and nothing is deployed. Set it, then re-run the workflow.
 name: Deploy to GitHub Pages
 
 on:
@@ -27,13 +32,19 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check:names
+
+      # Must run BEFORE the build: it reports where the site will be served from.
+      # base_path is "/<repo-name>" for a project site and "" for a <user>.github.io user site,
+      # so vite.config.js normalises it rather than the value being used raw.
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
       - name: Build
-        # Project sites are served from https://<user>.github.io/<repo>/, so assets need that prefix.
-        # If this repo is named <user>.github.io (a user site), change BASE_PATH to "/".
         run: npm run build
         env:
-          BASE_PATH: /${{ github.event.repository.name }}/
-      - uses: actions/configure-pages@v5
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
