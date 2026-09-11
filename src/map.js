@@ -15,19 +15,26 @@ const districtFiles = import.meta.glob('./data/districts-*.json', { eager: true,
 /* A metric file (src/data/map-<id>.json) is self-describing: `columns.a/.b` carry label, source and
    asOf; each state carries `a`, `b` and `aStatus` ("verified" | "approximate" | "none").
    toMetric() flattens that into the shape the renderer uses: { id, name, unit, a, b, india: [a, b],
-   values: { State: [a, b] }, src }. The `src` footnote is generated so it stays truthful as states
-   get verified — with the three verified states of the original it reproduces the original copy. */
+   values: { State: [a, b] }, src }.
+
+   ONLY FIGURES CHECKED AGAINST THE CITED SOURCE ARE PUBLISHED. A state still marked
+   aStatus "approximate" renders exactly like one with no comparable series — grey, absent from the
+   rankings, "no comparable baseline" in its tooltip — rather than appearing on the page underneath a
+   citation that did not supply it. Marking a state "verified" (see `npm run import:pci`) is what puts
+   its figure on the map, and the footnote caveat clears itself once none are left. The same rule
+   applies to the all-India baseline through `india.status`. */
 export function toMetric(m) {
-  const values = Object.fromEntries(Object.entries(m.states).map(([n, s]) => [n, [s.a, s.b]]));
-  const approx = Object.entries(m.states).filter(([, s]) => s.aStatus === 'approximate');
+  const publishedA = s => s.aStatus === 'verified' ? s.a : null;
+  const values = Object.fromEntries(Object.entries(m.states).map(([n, s]) => [n, [publishedA(s), s.b]]));
+  const pending = Object.values(m.states).filter(s => s.aStatus === 'approximate').length;
   const verified = Object.entries(m.states).filter(([, s]) => s.aStatus === 'verified').map(([n]) => n);
-  const caveat = approx.length
-    ? ` — typed from memory except ${verified.join(', ')}; verify before publishing.`
+  const caveat = pending
+    ? ` — published so far for ${verified.join(', ')}; the other ${pending} are still being checked against that table.`
     : '.';
   return {
     id: m.id, name: m.name, unit: m.unit,
     a: m.columns.a.label, b: m.columns.b.label,
-    india: [m.india.a, m.india.b],
+    india: [m.india.status === 'verify' ? null : m.india.a, m.india.b],
     values,
     src: `${m.columns.b.label}: ${m.columns.b.source}. ${m.columns.a.label}: ${m.columns.a.source}${caveat}`
   };
@@ -69,6 +76,7 @@ export async function initMap() {
     ? (v >= 1e5 ? '₹' + (v / 1e5).toFixed(2) + ' L' : '₹' + Math.round(v).toLocaleString('en-IN'))
     : v.toLocaleString('en-IN') + (metric.unit ? ' ' + metric.unit : '');
   const fmtX = x => x == null ? '—' : x.toFixed(1) + '×';
+  const ratio = (a, b) => (a > 0 && b > 0) ? b / a : null;   // null whenever either end is missing or suppressed
   const valOf = (pair) => !pair ? null : mode === 'a' ? pair[0] : mode === 'b' ? pair[1] : (pair[0] && pair[1] ? pair[1] / pair[0] : null);
   const stateVal = n => valOf(metric.values[n]);
   const distVal = (s, d) => valOf((districtsOf()[s] || {})[d]);
@@ -141,17 +149,17 @@ export async function initMap() {
       const p = metric.values[open], r = rows.find(r => r.n === open);
       const dCount = Object.keys(districtsOf()[open] || {}).length;
       side.innerHTML = `<h3>${open}</h3>
-        <p class="n">${p && p[0] && p[1] ? fmtX(p[1] / p[0]) : '—'}</p>
+        <p class="n">${fmtX(ratio(p && p[0], p && p[1]))}</p>
         <p>${metric.a} ${fmt(p && p[0])} → ${metric.b} ${fmt(p && p[1])}</p>
-        <p class="s">${r ? 'Ranked ' + (rows.findIndex(x => x.n === open) + 1) + ' of ' + rows.length + ' by ' + (mode === 'x' ? 'change' : mode === 'a' ? metric.a : metric.b) : 'No comparable baseline.'} India went ${fmt(metric.india[0])} → ${fmt(metric.india[1])}, ${fmtX(metric.india[1] / metric.india[0])}.</p>
-        <p class="s">${dCount ? dCount + ' districts have their own figures.' : 'Districts show the state figure until you add district data.'}</p>
+        <p class="s">${r ? 'Ranked ' + (rows.findIndex(x => x.n === open) + 1) + ' of ' + rows.length + ' by ' + (mode === 'x' ? 'change' : mode === 'a' ? metric.a : metric.b) : 'No comparable baseline.'} ${metric.india[0] ? `India went ${fmt(metric.india[0])} → ${fmt(metric.india[1])}, ${fmtX(ratio(metric.india[0], metric.india[1]))}.` : `India was ${fmt(metric.india[1])} in ${metric.b}.`}</p>
+        <p class="s">${dCount ? dCount + ' districts have their own figures.' : 'District figures are not published for this state yet, so its districts carry the state figure.'}</p>
         <div class="csv">Add district figures as CSV: <code>state,district,${metric.a},${metric.b}</code><input type="file" accept=".csv" id="csv"></div>`;
       document.getElementById('csv').addEventListener('change', loadCSV);
     } else {
       const top = rows.slice(0, 5), bottom = rows.slice(-5);
       const li = r => `<li><span>${r.n}</span><span>${f(r[key])}</span></li>`;
       side.innerHTML = `<h3>${mode === 'x' ? 'Fastest and slowest' : 'Highest and lowest'}, ${mode === 'x' ? metric.a + ' to ' + metric.b : mode === 'a' ? metric.a : metric.b}</h3>
-        <p class="s">India: ${mode === 'x' ? fmtX(metric.india[1] / metric.india[0]) : fmt(metric.india[mode === 'a' ? 0 : 1])}</p>
+        <p class="s">India: ${mode === 'x' ? fmtX(ratio(metric.india[0], metric.india[1])) : fmt(metric.india[mode === 'a' ? 0 : 1])}</p>
         <ul class="rank">${top.map(li).join('')}<li style="border-top-style:dashed;color:var(--ink-soft)"><span>…</span><span></span></li>${bottom.map(li).join('')}</ul>
         <p class="s" style="margin-top:12px">${metric.src}</p>`;
     }
