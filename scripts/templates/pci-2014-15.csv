@@ -1,37 +1,37 @@
-state,value
-"Andhra Pradesh",
-"Arunachal Pradesh",
-"Assam",
-"Bihar",
-"Chhattisgarh",
+"state","value"
+"Andhra Pradesh",93903
+"Arunachal Pradesh",114789
+"Assam",52895
+"Bihar",28671
+"Chhattisgarh",72936
 "Delhi",247209
-"Goa",
-"Gujarat",
-"Haryana",147076
-"Himachal Pradesh",
-"Jammu and Kashmir",
-"Jharkhand",
-"Karnataka",
-"Kerala",
-"Madhya Pradesh",
-"Maharashtra",
-"Manipur",
-"Meghalaya",
-"Mizoram",
-"Nagaland",
-"Odisha",
-"Puducherry",175006
-"Punjab",
-"Rajasthan",
-"Sikkim",
-"Tamil Nadu",
-"Telangana",
-"Tripura",
-"Uttar Pradesh",
-"Uttarakhand",
-"West Bengal",
-"Chandigarh",
-"Andaman and Nicobar Islands",
-"Ladakh",
-"Lakshadweep",
-"Dadra and Nagar Haveli and Daman and Diu",
+"Goa",289185
+"Gujarat",127017
+"Haryana",147382
+"Himachal Pradesh",123299
+"Jammu and Kashmir",62327
+"Jharkhand",57301
+"Karnataka",130024
+"Kerala",135537
+"Madhya Pradesh",55678
+"Maharashtra",132836
+"Manipur",52717
+"Meghalaya",66485
+"Mizoram",103049
+"Nagaland",78367
+"Odisha",63345
+"Puducherry",146921
+"Punjab",108970
+"Rajasthan",76429
+"Sikkim",214148
+"Tamil Nadu",129494
+"Telangana",124104
+"Tripura",69857
+"Uttar Pradesh",43458
+"Uttarakhand",136099
+"West Bengal",68876
+"Chandigarh",212594
+"Andaman and Nicobar Islands",126344
+"Ladakh",""
+"Lakshadweep",""
+"Dadra and Nagar Haveli and Daman and Diu",""

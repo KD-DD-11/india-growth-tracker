@@ -5,7 +5,8 @@
 
    CSV columns: state,value   (header row required; extra columns ignored; blank values skipped)
    State names must match public/data/india.topojson `st_nm` exactly — unmatched names are reported
-   and nothing is written. Each imported state gets aStatus "verified" (override with --status). */
+   and nothing is written. Each imported state gets <column>Status "verified" (override with --status),
+   which is what puts the figure on the page — see toMetric() in src/map.js. */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,9 +37,9 @@ for (const r of rows) {
   if (raw === '') continue;
   const v = Number(raw);
   if (!Number.isFinite(v)) { console.error(`skip ${r.state}: "${raw}" is not a number`); continue; }
-  metric.states[r.state] = metric.states[r.state] || { a: null, b: null, aStatus: 'none' };
+  metric.states[r.state] = metric.states[r.state] || { a: null, b: null, aStatus: 'none', bStatus: 'none' };
   metric.states[r.state][column] = v;
-  if (column === 'a') metric.states[r.state].aStatus = status;
+  metric.states[r.state][column + 'Status'] = status;
   n++;
 }
 writeFileSync(path, JSON.stringify(metric, null, 2).replace(/\{\n\s+"a": ([^,]+),\n\s+"b": ([^,]+),\n\s+"aStatus": ("[a-z]+")\n\s+\}/g, '{ "a": $1, "b": $2, "aStatus": $3 }') + '\n');

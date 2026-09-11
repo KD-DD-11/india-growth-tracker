@@ -13,7 +13,9 @@ const metricFiles = import.meta.glob('./data/map-*.json', { eager: true, import:
 const districtFiles = import.meta.glob('./data/districts-*.json', { eager: true, import: 'default' });
 
 /* A metric file (src/data/map-<id>.json) is self-describing: `columns.a/.b` carry label, source and
-   asOf; each state carries `a`, `b` and `aStatus` ("verified" | "approximate" | "none").
+   asOf; each state carries `a`, `b` and an `aStatus`/`bStatus` ("verified" | "approximate" | "none"),
+   plus an optional `bSource` when that one figure comes from somewhere other than the column's source.
+   `india` carries the same status fields, so an unchecked all-India baseline is simply not shown.
    toMetric() flattens that into the shape the renderer uses: { id, name, unit, a, b, india: [a, b],
    values: { State: [a, b] }, src }.
 
@@ -24,19 +26,31 @@ const districtFiles = import.meta.glob('./data/districts-*.json', { eager: true,
    its figure on the map, and the footnote caveat clears itself once none are left. The same rule
    applies to the all-India baseline through `india.status`. */
 export function toMetric(m) {
-  const publishedA = s => s.aStatus === 'verified' ? s.a : null;
-  const values = Object.fromEntries(Object.entries(m.states).map(([n, s]) => [n, [publishedA(s), s.b]]));
-  const pending = Object.values(m.states).filter(s => s.aStatus === 'approximate').length;
-  const verified = Object.entries(m.states).filter(([, s]) => s.aStatus === 'verified').map(([n]) => n);
-  const caveat = pending
-    ? ` — published so far for ${verified.join(', ')}; the other ${pending} are still being checked against that table.`
-    : '.';
+  // A value reaches the page only when its status for that column is "verified". Anything else renders
+  // exactly like a state with no comparable series: grey, out of the rankings, "no comparable baseline".
+  const shown = (st, col) => st[col + 'Status'] === 'verified' ? st[col] : null;
+  const values = Object.fromEntries(Object.entries(m.states).map(([n, st]) => [n, [shown(st, 'a'), shown(st, 'b')]]));
+
+  const notes = [];
+  for (const col of ['a', 'b']) {
+    const pending = Object.entries(m.states).filter(([, st]) => st[col + 'Status'] === 'approximate');
+    if (pending.length) notes.push(`${pending.length} state${pending.length > 1 ? 's are' : ' is'} not shown for ${m.columns[col].label}, still being checked against that source`);
+  }
+  const exceptions = Object.entries(m.states).filter(([, st]) => st.bSource && shown(st, 'b') != null).map(([n]) => n);
+  if (exceptions.length) notes.push(`${exceptions.join(', ')} ${exceptions.length > 1 ? 'come' : 'comes'} from MoSPI for ${m.columns.b.label}, which that table leaves blank`);
+  const caveat = notes.length ? ` — ${notes.join('; ')}.` : '.';
+
+  // Both columns usually come from one publication; say so once rather than printing it twice.
+  const src = m.columns.a.source === m.columns.b.source
+    ? `${m.columns.a.label} and ${m.columns.b.label}: ${m.columns.a.source}${caveat}`
+    : `${m.columns.b.label}: ${m.columns.b.source}. ${m.columns.a.label}: ${m.columns.a.source}${caveat}`;
+
   return {
     id: m.id, name: m.name, unit: m.unit,
     a: m.columns.a.label, b: m.columns.b.label,
-    india: [m.india.status === 'verify' ? null : m.india.a, m.india.b],
+    india: [shown(m.india, 'a'), shown(m.india, 'b')],   // same publish rule as the states
     values,
-    src: `${m.columns.b.label}: ${m.columns.b.source}. ${m.columns.a.label}: ${m.columns.a.source}${caveat}`
+    src
   };
 }
 
@@ -140,6 +154,20 @@ export async function initMap() {
   }
   document.getElementById('map-back').addEventListener('click', reset);
 
+  /* The all-India baseline is optional: it is shown only for figures that passed the same check as the
+     states, and the line is dropped entirely rather than printing a dash for a figure we do not publish. */
+  function indiaValue() { return mode === 'x' ? ratio(metric.india[0], metric.india[1]) : metric.india[mode === 'a' ? 0 : 1]; }
+  function indiaLine() {
+    const v = indiaValue();
+    return v == null ? '' : `<p class="s">India: ${mode === 'x' ? fmtX(v) : fmt(v)}</p>`;
+  }
+  function indiaSentence() {
+    const [a, b] = metric.india;
+    if (a != null && b != null) return `India went ${fmt(a)} → ${fmt(b)}, ${fmtX(ratio(a, b))}.`;
+    if (b != null) return `India was ${fmt(b)} in ${metric.b}.`;
+    return '';
+  }
+
   function renderSide() {
     // A state belongs in the ranking when it has a published figure for the year on screen. Only the
     // change view needs both ends, so suppressing an unverified 2014-15 figure must not drop that state
@@ -155,7 +183,7 @@ export async function initMap() {
       side.innerHTML = `<h3>${open}</h3>
         <p class="n">${fmtX(ratio(p && p[0], p && p[1]))}</p>
         <p>${metric.a} ${fmt(p && p[0])} → ${metric.b} ${fmt(p && p[1])}</p>
-        <p class="s">${r ? 'Ranked ' + (rows.findIndex(x => x.n === open) + 1) + ' of ' + rows.length + ' by ' + (mode === 'x' ? 'change' : mode === 'a' ? metric.a : metric.b) : 'No comparable baseline.'} ${metric.india[0] ? `India went ${fmt(metric.india[0])} → ${fmt(metric.india[1])}, ${fmtX(ratio(metric.india[0], metric.india[1]))}.` : `India was ${fmt(metric.india[1])} in ${metric.b}.`}</p>
+        <p class="s">${r ? 'Ranked ' + (rows.findIndex(x => x.n === open) + 1) + ' of ' + rows.length + ' by ' + (mode === 'x' ? 'change' : mode === 'a' ? metric.a : metric.b) : 'No comparable baseline.'} ${indiaSentence()}</p>
         <p class="s">${dCount ? dCount + ' districts have their own figures.' : 'District figures are not published for this state yet, so its districts carry the state figure.'}</p>
         <div class="csv">Add district figures as CSV: <code>state,district,${metric.a},${metric.b}</code><input type="file" accept=".csv" id="csv"></div>`;
       document.getElementById('csv').addEventListener('change', loadCSV);
@@ -167,7 +195,7 @@ export async function initMap() {
       const li = r => `<li><span>${r.n}</span><span>${f(r[key])}</span></li>`;
       const gap = elide ? '<li style="border-top-style:dashed;color:var(--ink-soft)"><span>…</span><span></span></li>' : '';
       side.innerHTML = `<h3>${mode === 'x' ? 'Fastest and slowest' : 'Highest and lowest'}, ${mode === 'x' ? metric.a + ' to ' + metric.b : mode === 'a' ? metric.a : metric.b}</h3>
-        <p class="s">India: ${mode === 'x' ? fmtX(ratio(metric.india[0], metric.india[1])) : fmt(metric.india[mode === 'a' ? 0 : 1])}</p>
+        ${indiaLine()}
         <ul class="rank">${head.map(li).join('')}${gap}${tail.map(li).join('')}</ul>
         <p class="s" style="margin-top:12px">${metric.src}</p>`;
     }

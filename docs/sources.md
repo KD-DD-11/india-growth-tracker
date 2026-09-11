@@ -49,12 +49,47 @@ to copy or units, so it is a deliberate edit, not a restructure. **Verify** = fi
 | Society tile | Rural households with tap water 80%+ | Jal Jeevan Mission dashboard | Gov | `ejalshakti.gov.in/jjmreport` (HTML dashboard, no JSON feed found) |
 | Society chart | Life expectancy at birth | World Bank `SP.DYN.LE00.IN`, live | Swap | Registrar General of India, Sample Registration System (SRS) abridged life tables — PDF releases, not an API. Five-year periods rather than annual points. |
 | Society chart | People using the internet, % | World Bank `IT.NET.USER.ZS` (ITU estimates), live | Swap | TRAI quarterly "Indian Telecom Services Performance Indicators" (internet subscribers, not users; PDF/XLSX; also on data.gov.in). Different definition from the ITU series, so the caption changes. |
-| Map | Per-capita NSDP by state, 2014-15 and 2023-24 | RBI Handbook Table 19 (2014-15, 30 states unverified) and MoSPI state series (2023-24) | Gov, verify | RBI Handbook of Statistics on Indian States (annual, XLSX on rbi.org.in); MoSPI state-wise NSDP releases |
+| Map | Per-capita NSDP by state, 2014-15 and 2023-24 | RBI Handbook of Statistics on Indian States, Table 19, both columns | **Gov, verified 12 Sep 2026** | Read from the published XLSX, see below |
+
+## Map figures: verified 12 September 2026
+
+Both map columns now come from **RBI Handbook of Statistics on Indian States, Table 19 — Per Capita Net
+State Domestic Product (Current Prices), base 2011-12**, read from the published spreadsheet
+(`rbidocs.rbi.org.in/rdocs/Publications/DOCs/19T_11122025B8CC230E4A34431999B4D6A107707BCA.XLSX`, linked
+from the Handbook's annual-publications page). Using one publication for both years keeps the change
+ratio like-for-like.
+
+What the check found, replacing figures that had been typed from memory:
+
+- **21 of 33 states had the wrong 2014-15 value.** Worst cases: Goa was carrying its own 2011-12 figure
+  (₹2,59,444 instead of ₹2,89,185), West Bengal was out by ₹7,124, Sikkim by ₹10,852.
+- **Two of the three states previously flagged `verified` were wrong**: Puducherry by ₹28,085 (19%) and
+  Haryana by ₹306. Only Delhi was right. The flag itself was not trustworthy, which is why everything
+  was re-read rather than spot-checked.
+- **The 2023-24 column was already correct**: all 33 states RBI publishes matched exactly.
+
+Independent corroboration: MoSPI's eSankhyiki NAS API (indicator 25, Per Capita NSDP) agrees with every
+imported 2014-15 value, 17 exactly and 16 off by exactly ₹1 through rounding.
+
+Two divergences worth knowing about:
+
+- **Karnataka 2014-15.** NAS indicator 32 reports ₹1,43,902 where RBI Table 19 and NAS indicator 25 both
+  report ₹1,30,024. Two sources against one, so the ₹1,30,024 figure is used.
+- **2023-24 vintages.** MoSPI's live API carries a newer vintage than the Handbook, differing by up to
+  ~8% (Goa ₹5,85,953 vs ₹5,42,341, Uttarakhand ₹2,46,178 vs ₹2,32,457). The Handbook values are kept so
+  both years share one vintage. Revisit if you would rather track MoSPI's latest.
+- **Gujarat 2023-24** is the single exception: RBI prints "-", so its ₹2,99,860 comes from NAS
+  indicator 32 and the state records that in its own `bSource`.
+
+Still not published, by design: **the all-India baseline**. Neither RBI Table 19 nor any NAS indicator
+(1-34 checked) carries an All-India per-capita row, and per capita net national income is a different
+measure from per capita NSDP anyway. The side panel simply omits the India line until you supply a
+figure read off a MoSPI release.
 
 ## Recommended order of work
 
 1. Fill in the two missing sources (airports, metro) from the PIB releases you took the numbers from.
-2. Verify the 30 approximate map states against RBI Handbook Table 19 (`npm run import:pci`).
+2. Source the all-India per-capita baseline from a MoSPI publication, or drop the India comparison.
 3. Decide on the four World Bank charts. Two honest options: keep them as clearly-labelled World Bank
    series (they are compiled from MoSPI and RGI data anyway), or replace them with MoSPI ₹ series from
    `src/data/mospi.json` and update the captions. The refresh script already delivers the data for the

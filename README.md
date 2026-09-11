@@ -79,22 +79,23 @@ should be bumped by hand when the underlying JSON changes.
 }
 ```
 
-`aStatus` decides whether a state's 2014-15 figure is **published at all**. Only `verified` reaches the page:
+`aStatus` and `bStatus` decide whether a figure is **published at all**. Only `verified` reaches the page:
 
-| `aStatus` | Meaning | On the page |
+| status | Meaning | On the page |
 |---|---|---|
-| `verified` | Checked against RBI Handbook of Statistics on Indian States, **Table 19 — per capita NSDP, current prices** | Shaded, ranked, shown in the tooltip |
-| `approximate` | Typed from memory, not checked against that table. **30 states are in this state today.** | Not published: grey, out of the ranking, "no comparable baseline" in the tooltip |
-| `none` | No comparable 2014-15 series (Ladakh, Lakshadweep, DNH & DD); `a` is `null` | Not published, same as `approximate` |
+| `verified` | Read from the source the column cites | Shaded, ranked, shown in the tooltip |
+| `approximate` | Not checked against that source | Not published: grey, out of the ranking, "no comparable baseline" |
+| `none` | No comparable series for that year | Not published, same as `approximate` |
 
-This is deliberate. The page cites Table 19 as the source for that column, so a figure that has not been
-checked against Table 19 must not appear under that citation. The 2023-24 column is unaffected: it comes
-from the MoSPI state series and every state is published and ranked in that view. The all-India baseline
-follows the same rule through `india.status`, which is why the 2014-15 view currently shows "India: —".
+This is deliberate, and it is load-bearing. Before both columns were re-read from RBI Table 19 in
+September 2026, 21 of 33 states carried a wrong 2014-15 figure under a citation to that table, and two of
+the three states then flagged `verified` were themselves wrong. Publishing only what has been read off
+the cited document is what stops that recurring. The same rule applies to the all-India baseline through
+`india.aStatus` / `india.bStatus`; it is currently unpublished, so the side panel omits the India line.
 
-The footnote under the ranking panel is generated from these flags ("published so far for Delhi, Haryana,
-Puducherry; the other 30 are still being checked against that table"), so it disappears by itself once every
-state is `verified`.
+A state may carry `bSource` when that one figure comes from somewhere other than the column's source
+(today: Gujarat's 2023-24, which RBI leaves blank). The footnote under the ranking panel names any such
+exception and any column still being checked, and clears itself once nothing is outstanding.
 
 ### Adding a metric to the map
 
@@ -122,12 +123,15 @@ nothing until they are fixed. `npm run check:names` re-checks every name already
 The file-picker in the side panel (visible once a state is open) previews a CSV in the browser for the
 current metric without saving it; unmatched names are listed in the browser console.
 
-### Pasting in the corrected 2014-15 column
+### Re-reading a column from the source
 
-1. `npm run check:data` prints the states still marked `approximate` with their current values.
-2. Open `scripts/templates/pci-2014-15.csv` (every state name pre-filled, verified values already in place),
-   paste the Table 19 figures into the `value` column, save it anywhere.
-3. `npm run import:pci -- path/to/your.csv`
+1. `npm run check:data` prints anything still marked `approximate`, with its current value.
+2. Put the checked figures in a CSV with a `state,value` header (`scripts/templates/pci-2014-15.csv` has
+   every state name pre-filled).
+3. `npm run import:pci -- path/to/your.csv [--column a|b]`
+
+Both current columns came from the RBI Handbook Table 19 spreadsheet; `docs/sources.md` records the exact
+document, what it corrected, and how MoSPI's API corroborates it.
 
 The importer checks each state name against the topojson (and suggests the nearest match when one is
 off, e.g. "Orissa" → Odisha), writes the values, and marks those states `verified`. Blank values are skipped

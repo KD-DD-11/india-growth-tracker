@@ -45,11 +45,20 @@ for (const file of readdirSync(dataDir).filter(f => /^map-.*\.json$/.test(f))) {
   const m = read(file);
   for (const c of ['a', 'b']) need(m.columns[c], `${file} columns.${c}`, ['label', 'source', 'asOf']);
   need(m.india, `${file} india`);
+  for (const col of ['a', 'b']) {
+    const st = m.india[col + 'Status'];
+    if (!['verified', 'approximate', 'none'].includes(st)) problems.push(`${file} india: ${col}Status must be verified | approximate | none`);
+    if (st === 'approximate') approximate.push({ file, name: 'India (all-India baseline)', col, label: m.columns[col].label, v: m.india[col] });
+  }
   for (const [name, s] of Object.entries(m.states)) {
-    if (!['verified', 'approximate', 'none'].includes(s.aStatus)) problems.push(`${file} ${name}: aStatus must be verified | approximate | none`);
-    if (s.aStatus === 'approximate') approximate.push({ file, name, a: s.a });
-    if (s.aStatus === 'approximate' && s.a == null) problems.push(`${file} ${name}: aStatus "approximate" but a is null — use "none" instead`);
-    if (s.aStatus === 'none' && s.a != null) problems.push(`${file} ${name}: aStatus "none" but a = ${s.a}`);
+    for (const col of ['a', 'b']) {
+      const st = s[col + 'Status'], v = s[col], label = m.columns[col].label;
+      if (!['verified', 'approximate', 'none'].includes(st)) problems.push(`${file} ${name}: ${col}Status must be verified | approximate | none`);
+      if (st === 'approximate') approximate.push({ file, name, col, label, v });
+      if (st === 'approximate' && v == null) problems.push(`${file} ${name}: ${col}Status "approximate" but ${col} is null — use "none" instead`);
+      if (st === 'none' && v != null) problems.push(`${file} ${name}: ${col}Status "none" but ${col} = ${v}`);
+      if (st === 'verified' && v == null) problems.push(`${file} ${name}: ${col}Status "verified" but ${col} is null`);
+    }
   }
 }
 
@@ -81,8 +90,8 @@ if (problems.length) {
 }
 
 if (approximate.length) {
-  console.log(`\n${approximate.length} state(s) are NOT published on the map because the ${read('map-pci.json').columns.a.label} column is still unverified. Check them against RBI Handbook of Statistics on Indian States, Table 19 (per capita NSDP, current prices):\n`);
-  for (const { name, a } of approximate) console.log(`  ${name.padEnd(42)} currently ${a == null ? '(no value)' : a.toLocaleString('en-IN')}`);
-  console.log('\nPaste the corrected column into a CSV (state,value) and run: npm run import:pci -- <file.csv>');
+  console.log(`\n${approximate.length} figure(s) are NOT published on the map because they have not been checked against the cited source:\n`);
+  for (const { name, col, label, v } of approximate) console.log(`  ${(name + ' (' + label + ')').padEnd(46)} currently ${v == null ? '(no value)' : v.toLocaleString('en-IN')}  [${col}Status]`);
+  console.log('\nPaste the checked column into a CSV (state,value) and run: npm run import:pci -- <file.csv> [--column a|b]');
   console.log('A template with every state name is in scripts/templates/pci-2014-15.csv\n');
 }
