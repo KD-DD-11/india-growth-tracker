@@ -1,39 +1,108 @@
 {
   "ledger": [
-    { "n": "24.5", "unit": "bn", "l": "UPI transactions, August 2026", "source": "NPCI", "sourceType": "government", "asOf": "1 Sep 2026" },
-    { "n": "₹29.8", "unit": "L cr", "l": "Value moved on UPI, August 2026", "source": "NPCI", "sourceType": "government", "asOf": "1 Sep 2026" },
-    { "n": "1,46,572", "unit": "km", "l": "National highway network", "source": "MoRTH", "sourceType": "government", "asOf": "Feb 2026" },
-    { "n": "164", "unit": "", "l": "Vande Bharat services running", "source": "Indian Railways", "sourceType": "government", "asOf": "early 2026" }
+    {
+      "n": "24.5",
+      "unit": "bn",
+      "l": "UPI transactions, August 2026",
+      "source": "NPCI",
+      "sourceType": "government",
+      "asOf": "1 Sep 2026",
+      "url": "https://www.npci.org.in/product/upi/product-statistics",
+      "verified": "2026-09-13",
+      "note_internal": "NPCI: August-2026 volume 24,508.96 Mn."
+    },
+    {
+      "n": "₹29.8",
+      "unit": "L cr",
+      "l": "Value moved on UPI, August 2026",
+      "source": "NPCI",
+      "sourceType": "government",
+      "asOf": "1 Sep 2026",
+      "url": "https://www.npci.org.in/product/upi/product-statistics",
+      "verified": "2026-09-13",
+      "note_internal": "NPCI: August-2026 value ₹29,82,355.95 Cr = ₹29.82 lakh crore. Confirmed correct; PIB documents carry only July (₹29.88 lakh crore), which is NOT this figure."
+    },
+    {
+      "n": "1,46,572",
+      "unit": "km",
+      "l": "National highway network",
+      "source": "MoRTH",
+      "sourceType": "government",
+      "asOf": "Feb 2026",
+      "url": "https://sansad.in/getFile/annex/270/AU588_SCiw0l.pdf?source=pqars",
+      "verified": "2026-09-13"
+    },
+    {
+      "n": "164",
+      "unit": "",
+      "l": "Vande Bharat services running",
+      "source": "Ministry of Railways via PIB",
+      "sourceType": "government",
+      "asOf": "12 Aug 2026",
+      "url": "https://www.pib.gov.in/FactsheetDetails.aspx?ModuleId=16&NoteId=150842&id=150842&reg=48&lang=2",
+      "verified": "2026-09-13",
+      "note_internal": "162 Vande Bharat Chair Car services plus 2 Vande Bharat Sleeper services = 164. Same total as the Year End Review of 26 Dec 2025."
+    }
   ],
   "upi": {
     "source": "NPCI",
     "sourceType": "government",
     "asOf": "Aug 2026",
-    "note": "UPI transaction volume in August of each year, billions per month.",
+    "note": "UPI transaction volume in August of each year, billions, from NPCI's UPI product statistics (monthly table), each rounded to two decimals from the millions NPCI publishes. Corrected 13 Sep 2026: 2025 was 19.63, which is SEPTEMBER 2025 (1,963 crore); August 2025 is 20,008.31 Mn. 2021 and 2023 were mis-rounded (3,555.55 Mn -> 3.56; 10,586.02 Mn -> 10.59).",
     "labels": ["2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],
-    "values": [0.92, 1.62, 3.55, 6.58, 10.58, 14.96, 19.63, 24.51]
+    "values": [0.92, 1.62, 3.56, 6.58, 10.59, 14.96, 20.01, 24.51],
+    "url": "https://www.npci.org.in/product/upi/product-statistics",
+    "verified": "2026-09-13"
   },
   "highways": {
     "source": "MoRTH",
     "sourceType": "government",
     "asOf": "Feb 2026",
-    "note": "Kilometres. Expressways = expressways and access-controlled corridors.",
+    "note": "Kilometres. National highway network: 91,287 km (March 2014) and 1,46,572 km (Feb 2026), Rajya Sabha Q588. Expressways = operational access-controlled National High-Speed Corridors / expressways: 93 km (2014) and 3,644 km as of Feb 2026, Lok Sabha Q6318 (2 Apr 2026) and Rajya Sabha Q4244 (1 Apr 2026). Corrected 13 Sep 2026 from 3,052 km, which is the December 2025 figure (PIB Year End Review) wrongly labelled Feb 2026.",
     "labels": ["March 2014", "February 2026"],
     "network": [91287, 146572],
-    "expressways": [93, 3052]
+    "expressways": [93, 3644],
+    "verified": "2026-09-13",
+    "url": "https://sansad.in/getFile/lsapps/loksabhaquestions/annex/187/AU6318_Rnl5g8.pdf?source=lsapps"
   },
   "thenNow": [
-    { "k": "National highways", "a": "91,287 km", "b": "1,46,572 km", "d": "+61%", "source": "MoRTH", "sourceType": "government", "asOf": "Feb 2026" },
+    {
+      "k": "National highways",
+      "a": "91,287 km",
+      "b": "1,46,572 km",
+      "d": "+61%",
+      "source": "MoRTH",
+      "sourceType": "government",
+      "asOf": "Feb 2026",
+      "url": "https://sansad.in/getFile/annex/270/AU588_SCiw0l.pdf?source=pqars",
+      "verified": "2026-09-13"
+    },
     {
       "k": "Expressways / access-controlled",
       "a": "93 km",
-      "b": "3,052 km",
-      "d": "33×",
+      "b": "3,644 km",
+      "d": "39×",
       "source": "MoRTH",
       "sourceType": "government",
-      "asOf": "Feb 2026"
+      "asOf": "Feb 2026",
+      "url": "https://sansad.in/getFile/lsapps/loksabhaquestions/annex/187/AU6318_Rnl5g8.pdf?source=lsapps",
+      "verified": "2026-09-13",
+      "quote": "The length of operational access-controlled National High-Speed Corridors (HSCs) / expressways has increased from 93 km in 2014 to 3,644 km as of February 2026.",
+      "note": "MoRTH, Lok Sabha Unstarred Q6318, 2 Apr 2026. National corridors only; the Economic Survey's 5,364 km adds State HSCs and must not be mixed with the 93 km national baseline."
     },
-    { "k": "Major port capacity", "a": "873 MMTPA", "b": "1,726 MMTPA", "d": "~2×", "source": "MoPSW", "sourceType": "government", "asOf": "2026" },
+    {
+      "k": "Major port capacity",
+      "a": "873 MMTPA",
+      "b": "1,728 MMTPA",
+      "d": "~2×",
+      "source": "MoPSW via PIB",
+      "sourceType": "government",
+      "asOf": "12 Aug 2026",
+      "url": "https://www.pib.gov.in/FactsheetDetails.aspx?ModuleId=16&NoteId=150842&id=150842&reg=48&lang=2",
+      "verified": "2026-09-13",
+      "quote": "Major ports' cargo handling capacity nearly doubled from 873 MMTPA in 2014 to 1,728 MMTPA in 2026",
+      "note": "Both endpoints from one PIB factsheet (12 Aug 2026). Corrected from 1,726, which matched no source. MoPSW's own Annual Report 2025-26 uses a different series — 800.52 MT for 2013-14 and 1,717.96 MT provisional to Dec 2025 — so do not mix its endpoints with this one."
+    },
     {
       "k": "UPI transactions per month",
       "a": "—",
@@ -41,7 +110,9 @@
       "d": "launched 2016",
       "source": "NPCI",
       "sourceType": "government",
-      "asOf": "Aug 2026"
+      "asOf": "Aug 2026",
+      "url": "https://www.npci.org.in/product/upi/product-statistics",
+      "verified": "2026-09-13"
     },
     {
       "k": "Operational airports",

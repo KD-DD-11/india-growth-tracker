@@ -7,9 +7,21 @@
       "source": "World Bank",
       "sourceType": "multilateral",
       "asOf": "2022–23",
-      "note": "from 16.2% in 2011–12"
+      "note": "from 16.2% in 2011–12",
+      "url": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2124545&reg=48&lang=2",
+      "verified": "2026-09-13",
+      "note_internal": "Correctly attributed: World Bank, US$2.15/day (2017 PPP), 2.3% in 2022-23 from 16.22% in 2011-12. Still a multilateral figure. Official Indian alternatives measure something different and cannot replace it: NITI Aayog National MPI headcount 11.28% (2022-23, projected) or 14.96% (2019-21, NFHS-5)."
     },
-    { "n": "80.9", "unit": "%", "l": "Literacy, age 7 and above", "source": "PLFS", "sourceType": "government", "asOf": "2023–24" },
+    {
+      "n": "80.9",
+      "unit": "%",
+      "l": "Literacy, age 7 and above",
+      "source": "PLFS",
+      "sourceType": "government",
+      "asOf": "2023–24",
+      "url": "https://www.mospi.gov.in/sites/default/files/publication_reports/AnnualReport_PLFS2023-24L2.pdf",
+      "verified": "2026-09-13"
+    },
     {
       "n": "41.7",
       "unit": "%",
@@ -17,16 +29,21 @@
       "source": "PLFS",
       "sourceType": "government",
       "asOf": "2023–24",
-      "note": "from 23.3% in 2017–18"
+      "note": "from 23.3% in 2017–18",
+      "url": "https://www.mospi.gov.in/sites/default/files/press_release/Press_note_AR_PLFS_2023_24_22092024.pdf",
+      "verified": "2026-09-13"
     },
     {
-      "n": "80",
-      "unit": "%+",
+      "n": "82.4",
+      "unit": "%",
       "l": "Rural households with tap water",
       "source": "Jal Jeevan Mission",
       "sourceType": "government",
-      "asOf": "2025",
-      "note": "from 17% in 2019"
+      "asOf": "13 Sep 2026",
+      "note": "from 16.7% in Aug 2019",
+      "url": "https://ejalshakti.gov.in/jjmreport/JJMIndia.aspx",
+      "verified": "2026-09-13",
+      "note_internal": "Jal Jeevan Mission live dashboard, as on 13 Sep 2026: 15,94,39,373 of 19,35,51,364 rural households (82.38%). Baseline 3,23,62,838 households (16.72%) on 15 Aug 2019. Replaces '80%+ / 2025 / from 17% in 2019'. The dashboard is live and moves daily."
     }
   ]
 }

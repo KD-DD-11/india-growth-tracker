@@ -117,6 +117,49 @@ The "Then and now" table now prints `source · asOf` under each row and links th
 document they came from. Before this it printed only a date, so even the rows that had a source did not
 show it.
 
+## Every remaining figure: verified 13 September 2026
+
+After the map and the airports and metro rows, every other hand-entered figure on the page was checked
+against the document it cites. Each was read directly from the source, then independently re-fetched by a
+second reader before anything changed. NPCI's figures were additionally read first-hand from NPCI's own
+monthly statistics feed. Each figure now records its `url` and a `verified` date in the data files.
+
+**Corrected**
+
+| Figure | Was | Now | Why |
+|---|---|---|---|
+| Quarterly real GDP growth chart | 6.5, 5.6, 6.4, 7.4, 6.9, 8.2, —, 8.6, 7.8 | 7.5, 7.3, 7.4, 6.6, 6.9, 8.1, —, 8.6, 7.8 | Captioned "at 2022–23 prices", but three bars were 2011-12-base figures and two matched neither base. Now all from Fig. 1 of the MoSPI press note of 31 Aug 2026. Q3 FY26 stays blank by choice. |
+| Headline text | "…and the fastest quarter in two years" | phrase removed | False on MoSPI's own series: Q2 FY26 (8.1%) and Q4 FY26 (8.6%) both exceed 7.8%. It also contradicted the chart directly below it. |
+| UPI, August 2025 | 19.63 bn | 20.01 bn | 19.63 bn is **September** 2025. NPCI: August 2025 = 20,008.31 Mn. |
+| UPI, August 2021 and 2023 | 3.55, 10.58 | 3.56, 10.59 | Mis-rounded from NPCI's 3,555.55 Mn and 10,586.02 Mn. |
+| Expressways, Feb 2026 | 3,052 km (33×) | 3,644 km (39×) | 3,052 km is the December 2025 figure, labelled Feb 2026. Lok Sabha Q6318 and Rajya Sabha Q4244 (both April 2026) give 3,644 km as of February 2026, same definition. |
+| Major port capacity, 2026 | 1,726 MMTPA | 1,728 MMTPA | 1,726 matched no source. PIB factsheet, 12 Aug 2026: 873 to 1,728 MMTPA. |
+| Rural tap water | "80%+", 2025, from 17% in 2019 | 82.4%, 13 Sep 2026, from 16.7% in Aug 2019 | Precise figure from the Jal Jeevan Mission live dashboard: 15,94,39,373 of 19,35,51,364 households. |
+| Vande Bharat | "Indian Railways · early 2026" | "Ministry of Railways via PIB · 12 Aug 2026" | 164 was right — 162 Chair Car plus 2 Sleeper services — but the date and source were vague. |
+
+**Confirmed correct, unchanged:** 7.8% real growth, ₹81.4 lakh crore real GDP (officially ₹81.36), 10.3%
+nominal, 11.9% investment, 7.1% consumption, the RBI's 7.0% projection, UPI volume 24.5 bn and value
+₹29.8 lakh crore for August 2026, UPI August volumes for 2019, 2020, 2022, 2024 and 2026, national
+highways 91,287 to 1,46,572 km (+61%), the 93 km expressway baseline, 873 MMTPA port baseline, literacy
+80.9%, female labour force participation 41.7% (from 23.3%), and the 2.3% and 16.2% World Bank poverty
+figures.
+
+**A mistake this round nearly made.** The August 2026 UPI *value* could not be found in any PIB document,
+which carry only July (₹29.88 lakh crore). That looked like evidence the stored ₹29.8 lakh crore was July's
+figure mislabelled, and the fix drafted was to relabel it. Reading NPCI directly showed August 2026 is
+₹29,82,355.95 crore — the stored figure was right. Absence from a secondary source is not evidence against
+a figure. Go to the source the figure actually cites.
+
+**Worth knowing about the sources**
+
+- NPCI publishes its monthly UPI table as JSON, which is the most direct official feed for these figures.
+  It sits behind bot protection: a real browser clears it on a normal page load, but scripted requests get
+  a 403, so it cannot yet be pulled by the monthly refresh workflow.
+- MoPSW's own Annual Report carries a *different* port-capacity series from PIB (800.52 MT in 2013-14,
+  1,717.96 MT provisional to December 2025). The row uses PIB's pair so both endpoints share one series.
+- The Economic Survey's 5,364 km of high-speed corridors adds State HSCs to the national figure. Do not set
+  it against the 93 km national baseline.
+
 ## Recommended order of work
 
 1. Source the all-India per-capita baseline from a MoSPI publication, or drop the India comparison.

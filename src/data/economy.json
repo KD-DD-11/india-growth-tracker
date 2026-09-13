@@ -1,16 +1,55 @@
 {
   "ledger": [
-    { "n": "7.8", "unit": "%", "l": "Real GDP growth, Q1 FY27", "source": "MoSPI", "sourceType": "government", "asOf": "31 Aug 2026" },
-    { "n": "₹81.4", "unit": "L cr", "l": "Real GDP, Q1 FY27 at 2022–23 prices", "source": "MoSPI", "sourceType": "government", "asOf": "31 Aug 2026" },
-    { "n": "10.3", "unit": "%", "l": "Nominal GDP growth, Q1 FY27", "source": "MoSPI", "sourceType": "government", "asOf": "31 Aug 2026" },
-    { "n": "4th", "unit": "", "l": "Largest economy by nominal GDP", "source": "IMF WEO", "sourceType": "multilateral", "asOf": "2025" }
+    {
+      "n": "7.8",
+      "unit": "%",
+      "l": "Real GDP growth, Q1 FY27",
+      "source": "MoSPI",
+      "sourceType": "government",
+      "asOf": "31 Aug 2026",
+      "url": "https://www.mospi.gov.in/uploads/latestReleases/latest_release_1788172583113_d65a77cf-240e-4491-82ee-59f78618fa41_Press_Note_on_GDP_Estimates_for_Q1_2026-27.pdf",
+      "verified": "2026-09-13"
+    },
+    {
+      "n": "₹81.4",
+      "unit": "L cr",
+      "l": "Real GDP, Q1 FY27 at 2022–23 prices",
+      "source": "MoSPI",
+      "sourceType": "government",
+      "asOf": "31 Aug 2026",
+      "url": "https://www.mospi.gov.in/uploads/latestReleases/latest_release_1788172583113_d65a77cf-240e-4491-82ee-59f78618fa41_Press_Note_on_GDP_Estimates_for_Q1_2026-27.pdf",
+      "verified": "2026-09-13",
+      "note_internal": "Official ₹81.36 lakh crore (₹81,36,153 crore), shown rounded."
+    },
+    {
+      "n": "10.3",
+      "unit": "%",
+      "l": "Nominal GDP growth, Q1 FY27",
+      "source": "MoSPI",
+      "sourceType": "government",
+      "asOf": "31 Aug 2026",
+      "url": "https://www.mospi.gov.in/uploads/latestReleases/latest_release_1788172583113_d65a77cf-240e-4491-82ee-59f78618fa41_Press_Note_on_GDP_Estimates_for_Q1_2026-27.pdf",
+      "verified": "2026-09-13"
+    },
+    {
+      "n": "4th",
+      "unit": "",
+      "l": "Largest economy by nominal GDP",
+      "source": "IMF WEO",
+      "sourceType": "multilateral",
+      "asOf": "2025",
+      "verified": "2026-09-13",
+      "note_internal": "Correctly attributed to IMF WEO. No Indian government body publishes its own world rank; NITI Aayog restates the IMF figure. Remains a multilateral source."
+    }
   ],
   "quarters": {
     "source": "MoSPI",
     "sourceType": "government",
     "asOf": "31 Aug 2026",
-    "note": "Real GDP growth by quarter, year on year, %, at 2022–23 prices. null = not yet entered (Q3 FY26 is deliberately null). Q1 FY26 and Q4 FY26 are revised figures per the Aug 2026 release.",
+    "note": "Real GDP growth by quarter, year on year, %, at constant 2022–23 prices, all read from Fig. 1 of the MoSPI press note of 31 Aug 2026. Q3 FY26 is deliberately null by the owner's choice (MoSPI publishes 7.7%). Corrected 13 Sep 2026: the previous series mixed base years — Q1 FY25 6.5, Q2 FY25 5.6 and Q2 FY26 8.2 were 2011-12-base figures, and Q3 FY25 6.4 and Q4 FY25 7.4 matched neither base — while the chart claimed 2022–23 prices.",
     "labels": ["Q1 FY25", "Q2 FY25", "Q3 FY25", "Q4 FY25", "Q1 FY26", "Q2 FY26", "Q3 FY26", "Q4 FY26", "Q1 FY27"],
-    "values": [6.5, 5.6, 6.4, 7.4, 6.9, 8.2, null, 8.6, 7.8]
+    "values": [7.5, 7.3, 7.4, 6.6, 6.9, 8.1, null, 8.6, 7.8],
+    "url": "https://www.mospi.gov.in/uploads/latestReleases/latest_release_1788172583113_d65a77cf-240e-4491-82ee-59f78618fa41_Press_Note_on_GDP_Estimates_for_Q1_2026-27.pdf",
+    "verified": "2026-09-13"
   }
 }

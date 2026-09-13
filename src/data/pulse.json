@@ -1,8 +1,11 @@
 {
   "value": 7.8,
   "unit": "%",
-  "text": "<b>Real GDP grew 7.8% in Q1 FY27</b> (April–June 2026), ahead of the RBI's 7% projection and the fastest quarter in two years. Nominal growth was 10.3%, investment rose 11.9% and consumption 7.1%.",
+  "text": "<b>Real GDP grew 7.8% in Q1 FY27</b> (April–June 2026), ahead of the RBI's 7% projection. Nominal growth was 10.3%, investment rose 11.9% and consumption 7.1%.",
   "source": "MoSPI",
   "sourceType": "government",
-  "asOf": "31 Aug 2026"
+  "asOf": "31 Aug 2026",
+  "url": "https://www.mospi.gov.in/uploads/latestReleases/latest_release_1788172583113_d65a77cf-240e-4491-82ee-59f78618fa41_Press_Note_on_GDP_Estimates_for_Q1_2026-27.pdf",
+  "verified": "2026-09-13",
+  "note": "7.8%, 10.3% nominal, 11.9% GFCF and 7.1% PFCE read from the MoSPI press note of 31 Aug 2026. The RBI's 7.0% Q1 FY27 projection is from the Monetary Policy Statement of 5 Aug 2026 (https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx?prid=63287). The phrase 'the fastest quarter in two years' was REMOVED on 13 Sep 2026: MoSPI's own quarterly series shows Q2 FY26 at 8.1% and Q4 FY26 at 8.6%, both above 7.8%."
 }
