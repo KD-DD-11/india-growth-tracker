@@ -55,12 +55,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--marigold);outline-o
 
 /* header */
 header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
-header .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px;flex-wrap:wrap}
 .brand{font-family:"Fraunces",serif;font-weight:500;font-size:1.15rem;letter-spacing:-.01em;text-decoration:none}
-nav{display:flex;gap:22px}
-nav a{text-decoration:none;color:var(--ink-soft);font-size:.92rem;padding:4px 0;border-bottom:2px solid transparent}
+nav{display:flex;gap:22px;flex-wrap:wrap;justify-content:flex-end;min-width:0}
+nav a{text-decoration:none;color:var(--ink-soft);font-size:.92rem;padding:4px 0;border-bottom:2px solid transparent;white-space:nowrap}
 nav a:hover,nav a[aria-current]{color:var(--ink);border-bottom-color:var(--marigold)}
-@media (max-width:560px){nav{gap:14px}nav a{font-size:.85rem}}
+/* On phones the nav takes its own row under the brand and wraps there, links kept whole. */
+@media (max-width:560px){nav{flex-basis:100%;justify-content:flex-start;gap:6px 14px;padding-bottom:6px}nav a{font-size:.82rem}header .wrap{height:auto;min-height:56px;padding-top:10px;row-gap:0}}
 
 /* hero */
 .hero{padding:56px 0 32px;display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:end}
@@ -109,7 +110,9 @@ figure h3{margin:0;font-size:1rem;font-weight:600}
 figure .note{font-size:.8rem;color:var(--ink-soft);margin:8px 0 0}
 
 /* then / now table */
-table{width:100%;border-collapse:collapse;margin-top:28px;font-size:.95rem}
+/* The then/now table scrolls inside its own container on narrow screens rather than widening the page. */
+.table-scroll{margin-top:28px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;min-width:420px;border-collapse:collapse;font-size:.95rem}
 th,td{text-align:left;padding:12px 10px 12px 0;border-bottom:1px solid var(--rule);vertical-align:top}
 th{font-weight:600;font-size:.85rem;color:var(--ink-soft)}
 td.num{font-family:"Fraunces",serif;font-size:1.25rem;letter-spacing:-.01em;white-space:nowrap}
