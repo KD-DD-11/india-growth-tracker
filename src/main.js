@@ -5,7 +5,7 @@ import infra from './data/infra.json';
 import society from './data/society.json';
 import { ledger, pulse, thenNow, quartersChart, upiChart, highwaysChart } from './charts.js';
 import { liveCharts } from './live.js';
-import { initMap } from './map.js';
+import { initComparator } from './comparator.js';
 import { initCompare } from './compare.js';
 
 /* ---------- ledgers, pulse, then/now ---------- */
@@ -26,8 +26,8 @@ liveCharts();
 /* ---------- compare periods ---------- */
 initCompare();
 
-/* ---------- state / district map ---------- */
-initMap();
+/* ---------- compare states: three maps ---------- */
+initComparator();
 
 /* ---------- nav highlight ---------- */
 const links = [...document.querySelectorAll('nav a')];

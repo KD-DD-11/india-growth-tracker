@@ -8,7 +8,6 @@
     "preview": "vite preview",
     "check:data": "node scripts/check-data.js",
     "import:pci": "node scripts/import-pci-baseline.js",
-    "import:districts": "node scripts/import-districts.js",
     "check:names": "node scripts/check-names.js",
     "check": "npm run check:names && npm run check:data",
     "refresh": "node scripts/refresh.js",

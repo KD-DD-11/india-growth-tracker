@@ -6,7 +6,8 @@
    CSV columns: state,value   (header row required; extra columns ignored; blank values skipped)
    State names must match public/data/india.topojson `st_nm` exactly — unmatched names are reported
    and nothing is written. Each imported state gets <column>Status "verified" (override with --status),
-   which is what puts the figure on the page — see toMetric() in src/map.js. */
+   the marker that a figure has been read from the cited source. map-pci.json is verified reference data;
+   the page itself now renders MoSPI's state-wise series from states.json. */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

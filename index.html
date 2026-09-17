@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>India, counted — a growth tracker</title>
+<title>India, compared — a growth comparator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/src/styles.css">
@@ -12,11 +12,11 @@
 
 <header>
   <div class="wrap">
-    <a class="brand" href="#top">India, counted</a>
+    <a class="brand" href="#top">India, compared</a>
     <nav aria-label="Sections">
+      <a href="#states">Compare states</a>
+      <a href="#compare">Compare periods</a>
       <a href="#economy">Economy</a>
-      <a href="#compare">Compare</a>
-      <a href="#states">By state</a>
       <a href="#infra">Infrastructure and tech</a>
       <a href="#society">Society</a>
     </nav>
@@ -25,28 +25,36 @@
 
 <main class="wrap" id="top">
 
-  <div class="hero">
-    <div>
-      <h1>From a $270 billion economy in 1991 to the world's fourth largest.</h1>
-      <p>A running ledger of how India is growing — output, roads and rails, digital rails, and the lives behind the numbers. Green dots mean the chart is pulling live data; grey dots mean figures embedded as of the date shown.</p>
+  <!-- COMPARE STATES: three maps -->
+  <section id="states" class="first">
+    <h2>Compare India, three maps at a time</h2>
+    <p class="lede">Choose a measure and a year for each map. Maps showing the same measure share one colour scale across every year, so a darker state in one map really is higher than a lighter one in another. Hover a state to read it in all three; click to pin it.</p>
+    <div class="map-controls">
+      <label class="cmp-basis-label" for="cmp-basis">Prices</label>
+      <select id="cmp-basis" aria-label="Price basis">
+        <option value="current">current prices / nominal</option>
+        <option value="constant">constant 2011-12 prices / real</option>
+      </select>
     </div>
-    <figure>
-      <figcaption><h3>GDP, current US$</h3><span class="src" id="src-gdp">connecting to World Bank</span></figcaption>
-      <div class="hero-chart"><canvas id="c-gdp"></canvas></div>
-    </figure>
-  </div>
-
-  <div class="pulse">
-    <div class="big" id="pulse-n"></div>
-    <p id="pulse-t"></p>
-  </div>
+    <div class="cmp-maps" id="cmp-maps"></div>
+    <div class="cmp-focus" id="cmp-focus"></div>
+    <p class="note" style="font-size:.8rem;color:var(--ink-soft);margin-top:12px">State-wise National Accounts from the Ministry of Statistics and Programme Implementation (MoSPI), 2011-12 base, fiscal years April to March; the latest year fills in as states publish. Boundaries: Census 2011 (udit-001/india-maps-data). Lakshadweep and DNH &amp; DD have no state accounts and stay grey.</p>
+  </section>
 
   <!-- ECONOMY -->
   <section id="economy">
     <h2>Economy</h2>
     <p class="lede">Output, reserves and trade. Quarterly growth is real GDP, year on year, at 2022–23 prices.</p>
+    <div class="pulse">
+      <div class="big" id="pulse-n"></div>
+      <p id="pulse-t"></p>
+    </div>
     <div class="ledger" id="ledger-econ"></div>
     <div class="charts">
+      <figure>
+        <figcaption><h3>GDP, current US$</h3><span class="src" id="src-gdp">connecting to World Bank</span></figcaption>
+        <div class="ch"><canvas id="c-gdp"></canvas></div>
+      </figure>
       <figure>
         <figcaption><h3>Real GDP growth by quarter</h3><span class="src" id="src-q">embedded, as of 31 Aug 2026</span></figcaption>
         <div class="ch"><canvas id="c-q"></canvas></div>
@@ -69,29 +77,6 @@
     </div>
     <div class="compare" id="compare-panels"></div>
     <p class="note" style="font-size:.8rem;color:var(--ink-soft);margin-top:12px">MoSPI's national accounts begin in 1950-51, three years after independence; the World Bank series run from 1960. Green dots are live, grey dots are official figures embedded as of the date in the data files.</p>
-  </section>
-
-  <!-- BY STATE / DISTRICT -->
-  <section id="states">
-    <h2>Where the growth landed</h2>
-    <p class="lede">Income per person by state, 2014-15 against 2023-24. Tap a state to open its districts; the shade carries over where district figures are not published. States are shaded for a year only where that figure has been checked against the cited source.</p>
-    <div class="map-controls">
-      <select id="metric" aria-label="Measure"></select>
-      <div class="seg" role="group" aria-label="Year">
-        <button data-mode="a" aria-pressed="false">2014-15</button>
-        <button data-mode="b" aria-pressed="true">2023-24</button>
-        <button data-mode="x" aria-pressed="false">Change</button>
-      </div>
-      <button class="btn-back" id="map-back" hidden>Back to India</button>
-    </div>
-    <div class="map-grid">
-      <div>
-        <div class="map-wrap" id="map"><div class="tip" id="tip"></div></div>
-        <div class="legend" id="legend"><div class="bar"></div><div class="lab"><span id="l0"></span><span id="l1"></span></div></div>
-      </div>
-      <aside class="side" id="side"></aside>
-    </div>
-    <p class="note" style="font-size:.8rem;color:var(--ink-soft);margin-top:12px">Boundaries: Census 2011 districts (udit-001/india-maps-data). Ladakh, Lakshadweep and DNH &amp; DD have no comparable 2014-15 series and are left unshaded in that view.</p>
   </section>
 
   <!-- INFRA & TECH -->
