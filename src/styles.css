@@ -121,10 +121,14 @@ section.first{padding-top:40px}
 .cmp-basis-label{font-size:.88rem;color:var(--ink-soft)}
 .cmp-maps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:8px}
 @media (max-width:800px){.cmp-maps{grid-template-columns:1fr;gap:28px}}
-.cmp-panel{margin:0;border-top:1px solid var(--rule);padding-top:12px}
+/* min-width:0 lets a grid column shrink below its content; without it the metric <select>'s longest option
+   dictates the column width and three panels overflow the page. */
+.cmp-panel{margin:0;border-top:1px solid var(--rule);padding-top:12px;min-width:0}
 .cmp-controls{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
-.cmp-controls select{font:inherit;font-size:.85rem;color:var(--ink);background:none;border:1px solid var(--rule);padding:5px 6px;max-width:100%}
+.cmp-controls select{font:inherit;font-size:.85rem;color:var(--ink);background:none;border:1px solid var(--rule);padding:5px 6px;width:100%;min-width:0;text-overflow:ellipsis}
 .cmp-panel .map-wrap{border-top:0;border-bottom:1px solid var(--rule);padding:4px 0;min-height:200px}
+.cmp-panel .map-wrap svg{max-width:100%}
+.cmp-cells > div{min-width:0}
 .cmp-panel .st.sel{stroke:var(--marigold);stroke-width:1.6;fill-opacity:1}
 .cmp-panel .legend .lab{display:grid;grid-template-columns:1fr auto 1fr}
 .cmp-panel .legend .lab span:nth-child(2){text-align:center}
