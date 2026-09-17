@@ -57,6 +57,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run refresh:mospi
+      - run: npm run refresh:states
       - run: npm run check:names
       # The script's own guards abort before writing, so reaching this step means files were written.
       # This asserts the invariants that matter to the page, which check:names does not look at.
@@ -72,6 +73,10 @@ jobs:
               if (bad >= 0) throw new Error('non-positive ' + k + ' GDP at ' + lr.labels[bad]);
             }
             console.log('gdp-long-run.json ok: ' + lr.years.length + ' years, ' + lr.labels[0] + ' to ' + lr.labels.at(-1));
+            const st = require('./src/data/states.json');
+            if (st.states.length < 30) throw new Error('states.json has only ' + st.states.length + ' states');
+            if (st.metrics.pcnsdp.values.current.Karnataka['2014-15'] !== 130024) throw new Error('states.json: Karnataka per-capita NSDP regressed to the indicator-32 copy error');
+            console.log('states.json ok: ' + st.states.length + ' states, ' + Object.keys(st.metrics).length + ' metrics, ' + st.years[0] + ' to ' + st.years.at(-1));
           "
       - name: Open a pull request if anything changed
         uses: peter-evans/create-pull-request@v7
@@ -81,14 +86,16 @@ jobs:
           add-paths: |
             src/data/mospi.json
             src/data/gdp-long-run.json
+            src/data/states.json
           commit-message: 'Refresh MoSPI National Accounts series'
           title: 'Refresh MoSPI National Accounts series'
           body: |
             Automated monthly run of `npm run refresh:mospi`.
 
             Re-pulls the National Accounts series from MoSPI's eSankhyiki API into `src/data/mospi.json`
-            (raw rows, as returned) and rebuilds `src/data/gdp-long-run.json`, the derived GDP series from
-            1950-51 at 2011-12 prices that `src/live.js` imports for the compare panels.
+            (raw rows, as returned), rebuilds `src/data/gdp-long-run.json`, the derived GDP series from
+            1950-51 at 2011-12 prices that `src/live.js` imports for the compare panels, and refreshes
+            `src/data/states.json`, the state-wise series behind the map comparator.
 
             The script refuses to write if the series would shrink, start later, contain a non-positive
             value, or carry a revision label it does not recognise — so if this PR exists, those guards

@@ -160,6 +160,24 @@ a figure. Go to the source the figure actually cites.
 - The Economic Survey's 5,364 km of high-speed corridors adds State HSCs to the national figure. Do not set
   it against the 93 km national baseline.
 
+## State comparator series (MoSPI, state-wise) — pulled 18 September 2026
+
+`src/data/states.json` holds five state-wise National Accounts metrics for 34 states/UTs, fiscal years
+2011-12 to 2025-26, at current and constant (2011-12) prices, from MoSPI's eSankhyiki API: per-capita NSDP
+(indicator 25, gaps from 32), per-capita GSDP (31), GSDP (23), GSDP growth (26), per-capita NSDP growth (28).
+One row per state-year, no competing vintages, all on the 2011-12 base. Coverage is 33-34 states a year for the
+per-capita metrics and 30 for the GSDP-based ones (Assam, Haryana, Nagaland and Ladakh are absent there);
+2025-26 has only 15 states so far. `npm run refresh:states` regenerates it; the monthly workflow runs it.
+
+**An error in the government feed, found and worked around.** MoSPI publishes per-capita NSDP twice.
+Indicator 32 covers all 34 states, but for Karnataka its per-capita NSDP column is identical to per-capita
+GSDP (indicator 31) in every one of the fifteen years — about 10% too high (₹1,43,902 for 2014-15 against
+₹1,30,024 in RBI Handbook Table 19). Indicator 25 carries the correct figure and agrees with RBI and, for every
+other state, with indicator 32 to within a rupee. So indicator 25 is primary, 32 fills only the four states 25
+lacks, and the script aborts if the two ever disagree beyond ₹2 for any state other than Karnataka. Indicator 28's
+growth rates were checked and are derived from the correct series. `npm run check:data` guards the Karnataka
+value so the error cannot creep back.
+
 ## Recommended order of work
 
 1. Source the all-India per-capita baseline from a MoSPI publication, or drop the India comparison.

@@ -12,7 +12,8 @@
     "check:names": "node scripts/check-names.js",
     "check": "npm run check:names && npm run check:data",
     "refresh": "node scripts/refresh.js",
-    "refresh:mospi": "node scripts/refresh-mospi.js"
+    "refresh:mospi": "node scripts/refresh-mospi.js",
+    "refresh:states": "node scripts/refresh-states.js"
   },
   "license": "MIT",
   "type": "module",

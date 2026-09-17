@@ -33,6 +33,18 @@ const lr = read('gdp-long-run.json');
 need(lr, 'gdp-long-run.json');
 if (lr.years.length !== lr.real.length || lr.years.length !== lr.labels.length) problems.push('gdp-long-run.json: years/labels/real arrays differ in length');
 
+// state comparator series (MoSPI)
+const st = read('states.json');
+need(st, 'states.json', ['source', 'sourceType', 'fetchedAt']);
+for (const [id, m] of Object.entries(st.metrics)) {
+  need(m, `states.json metrics.${id}`, ['source', 'sourceType', 'asOf']);
+  if (!Object.keys(m.values.current).length) problems.push(`states.json metrics.${id}: no values`);
+}
+// Regression guard for a known error in MoSPI's feed: indicator 32 repeats Karnataka's per-capita GSDP in its
+// per-capita NSDP column. refresh-states.js takes indicator 25 for that state; if this ever reads ~1,43,902
+// again the fallback logic has regressed. 1,30,024 is RBI Handbook Table 19's figure.
+if (st.metrics.pcnsdp?.values.current.Karnataka?.['2014-15'] !== 130024) problems.push('states.json: Karnataka per-capita NSDP 2014-15 is not 130024 — indicator-32 copy error has crept back in');
+
 // world bank fallbacks
 const wb = read('worldbank.json');
 need(wb, 'worldbank.json', ['source']);
